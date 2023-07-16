@@ -1,0 +1,17 @@
+{
+    "name":"DQuest",
+    "version":"1.0.0",
+    "manifest_version":3,
+    "author":"Mohamed Atef",
+    "action":{
+        "default_popup":"index.html",
+        "default_title":"DQuest"
+
+    },
+    "permissions":[
+        "activeTab",
+        "storage",
+        "scripting"
+    ]
+    
+    }
