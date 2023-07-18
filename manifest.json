@@ -1,17 +1,19 @@
 {
-    "name":"DQuest",
-    "version":"1.0.0",
-    "manifest_version":3,
-    "author":"Mohamed Atef",
-    "action":{
-        "default_popup":"index.html",
-        "default_title":"DQuest"
-
+    "manifest_version": 3,
+    "name": "DQuest",
+    "version": "1.0",
+    "description": "My Chrome extension with Lit",
+    "background": {
+      "service_worker": "service-worker.js"
     },
-    "permissions":[
-        "activeTab",
-        "storage",
-        "scripting"
-    ]
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "permissions": ["activeTab", "scripting"],
+  
+    "content_scripts": [{
+      "matches": ["<all_urls>"],
+      "js": ["dist/my-element.js"]
+    }]
     
     }

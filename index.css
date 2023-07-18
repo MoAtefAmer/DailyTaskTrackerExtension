@@ -29,6 +29,21 @@
   padding: 1rem;
 }
 
+.task-title {
+  display: flex;
+  font-size: 15px;
+  text-decoration: line-through;
+  color: #b3b3b3;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: #b3b3b3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .flex-between {
   display: flex;
   justify-content: space-between;
