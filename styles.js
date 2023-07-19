@@ -31,8 +31,8 @@ export const sharedStyles = css`
   .task-title {
     display: flex;
     font-size: 15px;
-    text-decoration: line-through;
-    color: #b3b3b3;
+    /* text-decoration: line-through; */
+    /* color: #b3b3b3; */
   }
 
   .timestamp {
