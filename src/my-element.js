@@ -28,21 +28,48 @@ class MyElement extends LitElement {
     this.tasks = [];
   }
 
+  async deleteAllTasks() {
+    await chrome.storage.sync.set({ tasks: [] });
+    this.loadTasks();
+  }
+
+  async setTasks(tasks) {
+    await chrome.storage.sync.set({ tasks });
+    this.loadTasks();
+  }
+
+  async completeTask(id) {
+    console.log('tasks1111 :>> ', this.tasks);
+    const completedTask = this.tasks.filter((task) => task.id === id);
+    completedTask[0].isCompleted = !completedTask[0].isCompleted;
+    let newTasks = this.tasks.filter((task) => task.id !== id);
+    console.log('newTasks :>> ', newTasks);
+    newTasks.push(completedTask[0]);
+
+    this.tasks = newTasks;
+    this.setTasks(this.tasks);
+    // this.loadTasks();
+  }
+
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
     console.log('tasks :>> ', tasks);
 
-    if (tasks === undefined || null){
+    if (tasks === undefined || null) {
       await chrome.storage.sync.set({
-        tasks: []
+        tasks: [],
       });
     }
     await chrome.storage.sync.set({
-      tasks: [...tasks,{
-        id: this.generateId(),
-        title: this.task,
-        date: new Date().toISOString(),
-      }],
+      tasks: [
+        ...tasks,
+        {
+          id: this.generateId(),
+          title: this.task,
+          date: new Date().toLocaleString('en-GB'),
+          isCompleted: false,
+        },
+      ],
     });
     // await chrome.storage.sync.set({ tasks: null });
     this.task = '';
@@ -69,6 +96,7 @@ class MyElement extends LitElement {
   render() {
     return html`
       <section class="main">
+        <button @click=${this.deleteAllTasks}>delete all</button>
         <form
           @submit=${(e) => {
             e.preventDefault();
@@ -91,14 +119,20 @@ class MyElement extends LitElement {
           />
           <button type="submit">click</button>
         </form>
-        ${
-        map(
+        ${map(
           this.tasks,
-          (task) => html` <div class="quest-card">
+          (task) => html` <div class="quest-card" @click=${() => this.completeTask(task.id)}>
             <div class="flex-between">
-              <div class="task-title">${task.title}</div>
-
-              <div style="display: flex">${checkmark}</div>
+              <div
+                class="task-title"
+                style="${task.isCompleted
+                  ? ' text-decoration: line-through; color: #b3b3b3;'
+                  : ''}"
+              >
+                ${task.title}
+              </div>
+       
+              <!-- <div style="display: flex">${checkmark}</div> -->
             </div>
 
             <div id="divider"></div>
@@ -115,7 +149,9 @@ class MyElement extends LitElement {
               >
                 <div>${editIcon}</div>
 
-                <div>${trashIcon}</div>
+                <div >
+                  ${trashIcon}
+                </div>
               </div>
             </div>
           </div>`

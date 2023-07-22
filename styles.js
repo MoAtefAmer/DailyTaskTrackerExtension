@@ -26,6 +26,7 @@ export const sharedStyles = css`
     align-items: start;
     flex-direction: column;
     padding: 1rem;
+    cursor: pointer;
   }
 
   .task-title {
