@@ -19,13 +19,62 @@ class MyElement extends LitElement {
     return {
       task: { type: String },
       tasks: { type: Object },
+      isInfinite: { type: Boolean },
     };
+  }
+
+  getNextDayDate() {
+    const currentDate = new Date();
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(currentDate.getDate() + 1); // Set the date to tomorrow
+    return nextDay.toLocaleDateString('en-US');
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    console.log('comp lodaded');
   }
 
   constructor() {
     super();
     this.task = '';
     this.tasks = [];
+    this.isInfinite = false;
+  }
+
+  toggleInfinite() {
+    this.isInfinite = !this.isInfinite;
+  }
+
+  async calculateDailyQuests() {
+    let storedTime = await chrome.storage.local.get('currentDate');
+    console.log('storedTImes :>> ', storedTime);
+    // If there is no stored time, set it to the next day
+    console.log('storedTime.currentDate.length :>> ', storedTime.currentDate.length);
+    console.log('!!storedTime :>> ', !!storedTime);
+    if ( storedTime.currentDate.length === 0) {
+      chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+    } else {
+      console.log('storedTime :>> ', storedTime);
+      const storedDateString = storedTime.currentDate;
+      const currentDateString = new Date().toLocaleDateString('en-US');
+      // Check the next day and reset the tasks
+      // if ("7/26/2023" <="7/24/2023" ) {
+        // console.log("ya a7a");
+      if (storedDateString <= currentDateString) {
+        this.tasks.forEach((task) => {
+          if (task.isCompleted && task.date === 'infinite') {
+            task.isCompleted = false;
+          }
+        });
+        this.setTasks(this.tasks)
+        console.log('this.tasksjjj :>> ', this.tasks);
+  
+
+        chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+      }
+    }
   }
 
   async deleteAllTasks() {
@@ -60,13 +109,18 @@ class MyElement extends LitElement {
         tasks: [],
       });
     }
+    let date = new Date().toLocaleString('en-GB');
+    if (this.isInfinite) {
+      date = 'infinite';
+    }
+
     await chrome.storage.sync.set({
       tasks: [
         ...tasks,
         {
           id: this.generateId(),
           title: this.task,
-          date: new Date().toLocaleString('en-GB'),
+          date: date,
           isCompleted: false,
         },
       ],
@@ -76,8 +130,9 @@ class MyElement extends LitElement {
     this.loadTasks();
   }
 
-  firstUpdated() {
-    this.loadTasks();
+ async firstUpdated() {
+    await this.loadTasks();
+    this.calculateDailyQuests();
   }
 
   generateId() {
@@ -91,9 +146,15 @@ class MyElement extends LitElement {
     const { tasks } = await chrome.storage.sync.get('tasks');
     this.tasks = tasks;
     console.log('this.tasks :>> ', this.tasks);
+  
   }
 
   render() {
+    console.log('this.isInfinite :>> ', this.isInfinite);
+    console.log('date :>> ', new Date().toLocaleDateString('en-US'));
+    console.log('date :>> ', new Date().toLocaleDateString('en-US'));
+
+    
     return html`
       <section class="main">
         <button @click=${this.deleteAllTasks}>delete all</button>
@@ -117,11 +178,19 @@ class MyElement extends LitElement {
             }}
             type="text"
           />
+          <input
+            type="checkbox"
+            @click=${this.toggleInfinite}
+            .checked=${this.isInfinite}
+          />
           <button type="submit">click</button>
         </form>
         ${map(
           this.tasks,
-          (task) => html` <div class="quest-card" @click=${() => this.completeTask(task.id)}>
+          (task) => html` <div
+            class="quest-card"
+            @click=${() => this.completeTask(task.id)}
+          >
             <div class="flex-between">
               <div
                 class="task-title"
@@ -131,13 +200,15 @@ class MyElement extends LitElement {
               >
                 ${task.title}
               </div>
-       
+
               <!-- <div style="display: flex">${checkmark}</div> -->
             </div>
 
             <div id="divider"></div>
             <div class="flex-between">
-              <div class="timestamp">${task.date}</div>
+              <div class="timestamp">
+                ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
+              </div>
 
               <div
                 style="
@@ -149,9 +220,7 @@ class MyElement extends LitElement {
               >
                 <div>${editIcon}</div>
 
-                <div >
-                  ${trashIcon}
-                </div>
+                <div>${trashIcon}</div>
               </div>
             </div>
           </div>`

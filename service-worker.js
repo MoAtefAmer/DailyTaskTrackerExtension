@@ -4,3 +4,4 @@ chrome.action.onClicked.addListener((tab) => {
       files: ['dist/my-element.js']
     });
   });
+
