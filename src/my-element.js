@@ -51,8 +51,13 @@ class MyElement extends LitElement {
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
-    if (storedTime?.currentDate?.length === 0) {
+    // chrome.storage.local.set({ currentDate: "7/26/2023" });
+    console.log('storedTime :>> ',storedTime );
+    console.log('storedTime?.currentDate === undefined :>> ',storedTime?.currentDate === undefined );
+    console.log('storedTime?.currentDate?.length === 0  :>> ', storedTime?.currentDate?.length === 0 );
+    if (storedTime?.currentDate?.length === 0 || storedTime?.currentDate === undefined ) {
       chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+  
     } else {
       const storedDateString = storedTime.currentDate;
       const currentDateString = new Date().toLocaleDateString('en-US');
@@ -135,6 +140,7 @@ class MyElement extends LitElement {
   async loadTasks() {
     const { tasks } = await chrome.storage.sync.get('tasks');
     this.tasks = tasks;
+    console.log(' Chrome storage:>> ', await chrome.storage.local.get('currentDate'));
   }
 
   async deleteTask(id) {
@@ -148,6 +154,7 @@ class MyElement extends LitElement {
   }
 
   render() {
+
     return html`
       <section class="main">
         <button @click=${this.deleteAllTasks}>delete all</button>
@@ -175,7 +182,7 @@ class MyElement extends LitElement {
         </form>
         ${map(
           this.tasks.filter(
-            (task) => task.date === 'infinite' && task.isCompleted === false
+            (task) => task.date === 'infinite' 
           ),
           (task) => html` <div
             class="quest-card"
