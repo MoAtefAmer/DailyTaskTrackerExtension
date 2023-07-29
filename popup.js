@@ -1,2 +1,2 @@
-import './dist/my-element.js';
+import './dist/app-main.js';
 

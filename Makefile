@@ -1,4 +1,4 @@
 .PHONY: run
 
 run:
-	npx esbuild src/my-element.js --bundle --format=esm --outfile=dist/my-element.js --watch
+	npx esbuild src/app-main.js --bundle --format=esm --outfile=dist/app-main.js --watch
