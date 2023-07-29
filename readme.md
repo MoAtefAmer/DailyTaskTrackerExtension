@@ -21,7 +21,8 @@ This is a lightweight app with no backend.
 make run
 ```
 to start the watch server
-![image](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/ad874ab8-e067-41cf-87a3-0fbb65f957e9)
+![image](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/97079b49-dbec-4a3d-8c78-1d7a46fb5b2f)
+
 
 ![image](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/903b27ec-0171-4438-bca4-57258c5f4c5a)
 
