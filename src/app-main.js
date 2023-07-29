@@ -85,8 +85,6 @@ class App extends LitElement {
 
     let newTasks = this.tasks.filter((task) => task.id !== id);
 
-
-   
     this.setTasks(newTasks);
     this.tasks = newTasks.length === 0 ? [] : newTasks;
     this.loadTasks();
@@ -96,7 +94,6 @@ class App extends LitElement {
     if (tasks !== undefined || null || [] || tasks.length !== 0) {
       await chrome.storage.sync.set({ tasks });
     } else {
-  
       await chrome.storage.sync.set({ tasks: [] });
     }
 
@@ -120,9 +117,8 @@ class App extends LitElement {
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
-    if (tasks === undefined || null || tasks.length===0) {
+    if (tasks === undefined || null || tasks.length === 0) {
       await chrome.storage.sync.set({ tasks: [] });
-
     }
     let date = new Date().toLocaleString('en-GB');
     if (this.isInfinite) {
@@ -159,11 +155,9 @@ class App extends LitElement {
 
   async loadTasks() {
     const { tasks } = await chrome.storage.sync.get('tasks');
-    
-    this.tasks =tasks;
+
+    this.tasks = tasks;
   }
-
-
 
   render() {
     console.log('this.tasks :>> ', this.tasks);
@@ -198,11 +192,11 @@ class App extends LitElement {
               this.tasks.filter((task) => {
                 if (task?.date === 'infinite') return task;
               }),
-              (task) => html` <div
-                class="quest-card"
-                
-              >
-                <div class="flex-between" @click=${() => this.completeTask(task.id)}>
+              (task) => html` <div class="quest-card">
+                <div
+                  class="flex-between"
+                  @click=${() => this.completeTask(task.id)}
+                >
                   <div
                     class="task-title"
                     style="${task.isCompleted
@@ -245,60 +239,61 @@ class App extends LitElement {
               </div>`
             )
           : ''}
-        ${!!this.tasks && this.tasks && this.tasks.length !== 0 ? map(
-          this.tasks.filter((task) => task.date !== 'infinite'),
-          (task) => html` <div
-            class="quest-card"
-           
-          >
-            <div class="flex-between"  @click=${() => this.completeTask(task.id)}>
-              <div
-                class="task-title"
-                style="${task.isCompleted
-                  ? ' text-decoration: line-through; color: #b3b3b3;'
-                  : ''}"
-              >
-                ${task.title}
-              </div>
+        ${!!this.tasks && this.tasks && this.tasks.length !== 0
+          ? map(
+              this.tasks.filter((task) => task.date !== 'infinite'),
+              (task) => html` <div class="quest-card">
+                <div
+                  class="flex-between"
+                  @click=${() => this.completeTask(task.id)}
+                >
+                  <div
+                    class="task-title"
+                    style="${task.isCompleted
+                      ? ' text-decoration: line-through; color: #b3b3b3;'
+                      : ''}"
+                  >
+                    ${task.title}
+                  </div>
 
-              <!-- <div style="display: flex">${checkmark}</div> -->
-            </div>
+                </div>
 
-            <div id="divider"></div>
-            <div class="flex-between">
-              <div class="timestamp">
-                ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
-              </div>
+                <div id="divider"></div>
+                <div class="flex-between">
+                  <div class="timestamp">
+                    ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
+                  </div>
 
-              <div
-                style="
+                  <div
+                    style="
               display: flex;
               justify-content: center;
               align-items: center;
               gap: 5px;
             "
-              >
-                <div
-                  style="${task.isCompleted
-                    ? ' text-decoration: line-through; color: #b3b3b3;'
-                    : ''} "
-                >
-                  ${editIcon}
-                </div>
+                  >
+                    <div
+                      style="${task.isCompleted
+                        ? ' text-decoration: line-through; color: #b3b3b3;'
+                        : ''} "
+                    >
+                      ${editIcon}
+                    </div>
 
-                <div
-                  class="change-color-onhover"
-                  @click=${(e) => this.deleteTask(task.id)}
-                  style="${task.isCompleted
-                    ? ' text-decoration: line-through; color: #b3b3b3;'
-                    : ''}"
-                >
-                  ${trashIcon}
+                    <div
+                      class="change-color-onhover"
+                      @click=${(e) => this.deleteTask(task.id)}
+                      style="${task.isCompleted
+                        ? ' text-decoration: line-through; color: #b3b3b3;'
+                        : ''}"
+                    >
+                      ${trashIcon}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>`
-        ):''}
+              </div>`
+            )
+          : ''}
       </section>
     `;
   }
