@@ -26,6 +26,7 @@ to start the watch server
 ![image](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/903b27ec-0171-4438-bca4-57258c5f4c5a)
 
 Now when you edit the code and hit the refresh button on the browser extension while the watch server is running it should work.
+![image](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/bb37b0a7-a95a-42c6-8869-02e6b496bcdf)
 
 
 
