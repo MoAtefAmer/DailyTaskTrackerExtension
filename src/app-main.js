@@ -114,6 +114,24 @@ class App extends LitElement {
     this.setTasks(this.tasks);
   }
 
+  async openEditingMode(id) {
+    const taskToBeEdited = this.tasks.filter((task) => {
+      if (task.id === id) {
+        console.log('do you want it');
+        task.isEditMode = !task.isEditMode;
+        return task;
+      }
+    });
+
+    let newTasks = this.tasks.filter((task) => task.id !== id);
+    newTasks.push(taskToBeEdited[0]);
+    this.tasks = newTasks.length === 0 ? [] : newTasks;
+    this.setTasks(this.tasks);
+    // console.log('taskToBeEdited :>> ', taskToBeEdited);
+
+    // this.loadTasks()
+  }
+
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
@@ -125,32 +143,33 @@ class App extends LitElement {
       date = 'infinite';
     }
 
-
-      if(tasks){
-        await chrome.storage.sync.set({
-          tasks: [
-           ...tasks,
-            {
-              id: this.generateId(),
-              title: this.task,
-              date: date,
-              isCompleted: false,
-            },
-          ],
-        });
-      }else{
-        // Init first time
-        await chrome.storage.sync.set({
-          tasks: [
-            {
-              id: this.generateId(),
-              title: this.task,
-              date: date,
-              isCompleted: false,
-            },
-          ],
-        });
-      }
+    if (tasks) {
+      await chrome.storage.sync.set({
+        tasks: [
+          ...tasks,
+          {
+            id: this.generateId(),
+            title: this.task,
+            date: date,
+            isCompleted: false,
+            isEditMode: false,
+          },
+        ],
+      });
+    } else {
+      // Init first time
+      await chrome.storage.sync.set({
+        tasks: [
+          {
+            id: this.generateId(),
+            title: this.task,
+            date: date,
+            isCompleted: false,
+            isEditMode: false,
+          },
+        ],
+      });
+    }
 
     // await chrome.storage.sync.set({ tasks: null });
     this.task = '';
@@ -160,6 +179,10 @@ class App extends LitElement {
   async firstUpdated() {
     await this.loadTasks();
     this.calculateDailyQuests();
+  }
+
+  updated() {
+    this.shadowRoot.getElementById('task-edit-input')?.focus();
   }
 
   generateId() {
@@ -211,7 +234,11 @@ class App extends LitElement {
               (task) => html` <div class="quest-card">
                 <div
                   class="flex-between"
-                  @click=${() => this.completeTask(task.id)}
+                  @click=${() => {
+                    if (!task.isEditMode) {
+                      this.completeTask(task.id);
+                    }
+                  }}
                 >
                   <div
                     class="task-title"
@@ -219,7 +246,33 @@ class App extends LitElement {
                       ? ' text-decoration: line-through; color: #b3b3b3;'
                       : ''}"
                   >
-                    ${task.title}
+                    ${!task.isEditMode
+                      ? task.title
+                      : html` <form
+                          @submit=${(e) => {
+                            e.preventDefault();
+
+                            // this.saveTask2();
+                          }}
+                        >
+                          <input
+                            id="task-edit-input"
+                            style=" border: none;background: transparent;outline: none;box-shadow: none;"
+                            .value=${task.title}
+                            @input=${(e) => {
+                              // console.log('As the hours pass :>> ', e.target.value);
+                            }}
+                            type="text"
+                          />
+                          <input
+                            type="checkbox"
+                            @click=${this.toggleInfinite}
+                            .checked=${task.date === 'infinite' ? true : false}
+                          />
+                          <button @click=${()=>{   const inputElement = this.shadowRoot.getElementById('task-edit-input')
+                                console.log('inputElement :>> ', inputElement.value);
+                          }}>click</button>
+                        </form>`}
                   </div>
 
                   <!-- <div style="display: flex">${checkmark}</div> -->
@@ -239,7 +292,13 @@ class App extends LitElement {
               gap: 5px;
             "
                   >
-                    <div>${editIcon}</div>
+                    <div
+                      @click=${() => {
+                        this.openEditingMode(task.id);
+                      }}
+                    >
+                      ${editIcon}
+                    </div>
 
                     <div
                       class="change-color-onhover"
@@ -271,7 +330,6 @@ class App extends LitElement {
                   >
                     ${task.title}
                   </div>
-
                 </div>
 
                 <div id="divider"></div>
