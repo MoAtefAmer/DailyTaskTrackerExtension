@@ -129,17 +129,33 @@ class App extends LitElement {
       date = 'infinite';
     }
 
-    await chrome.storage.sync.set({
-      tasks: [
-        ...tasks,
-        {
-          id: this.generateId(),
-          title: this.task,
-          date: date,
-          isCompleted: false,
-        },
-      ],
-    });
+
+      if(tasks){
+        await chrome.storage.sync.set({
+          tasks: [
+           ...tasks,
+            {
+              id: this.generateId(),
+              title: this.task,
+              date: date,
+              isCompleted: false,
+            },
+          ],
+        });
+      }else{
+        // Init first time
+        await chrome.storage.sync.set({
+          tasks: [
+            {
+              id: this.generateId(),
+              title: this.task,
+              date: date,
+              isCompleted: false,
+            },
+          ],
+        });
+      }
+
     // await chrome.storage.sync.set({ tasks: null });
     this.task = '';
     this.loadTasks();
