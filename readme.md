@@ -6,8 +6,6 @@ This is a lightweight app with no backend.
 ## How to load
 1- In your chrome browser, click on the top right 3 dots then click Extensions > Manage Extensions
 
-[Screencast from 07-30-2023 12:30:36 AM.webm](https://github.com/MoAtefAmer/DailyTaskTrackerExtension/assets/47057819/2f16e361-1427-46cf-86c7-e89f25a69d3b)
-
 
 2- Make sure your browser is in developer mode, then click load unpacked and choose the location of the folder of this project
 
