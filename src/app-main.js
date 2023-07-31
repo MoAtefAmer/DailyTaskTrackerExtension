@@ -25,6 +25,7 @@ class App extends LitElement {
       task: { type: String },
       tasks: { type: Object },
       isInfinite: { type: Boolean },
+      cardBeingEditedId: { type: String },
     };
   }
 
@@ -44,6 +45,7 @@ class App extends LitElement {
     this.task = '';
     this.tasks = [];
     this.isInfinite = false;
+    this.cardBeingEditedId = '';
   }
 
   toggleInfinite() {
@@ -117,20 +119,46 @@ class App extends LitElement {
   async openEditingMode(id) {
     const taskToBeEdited = this.tasks.filter((task) => {
       if (task.id === id) {
-        console.log('do you want it');
         task.isEditMode = !task.isEditMode;
+        if (!task.isEditMode) this.cardBeingEditedId = '';
         return task;
       }
     });
 
-    let newTasks = this.tasks.filter((task) => task.id !== id);
-    newTasks.push(taskToBeEdited[0]);
-    this.tasks = newTasks.length === 0 ? [] : newTasks;
+    this.tasks = this.tasks.map((task) =>
+      task.id === id ? taskToBeEdited[0] : task
+    );
     this.setTasks(this.tasks);
-    // console.log('taskToBeEdited :>> ', taskToBeEdited);
-
-    // this.loadTasks()
   }
+// Test this chatgpt code and see if it fits
+  // async editTask(taskId) {
+  //   const { tasks } = await chrome.storage.sync.get('tasks');
+  
+  //   if (tasks && tasks.length > 0) {
+  //     let updatedTasks = tasks.map(task => {
+  //       if (task.id === taskId) {
+  //         let date = new Date().toLocaleString('en-GB');
+  //         if (this.isInfinite) {
+  //           date = 'infinite';
+  //         }
+  
+  //         return {
+  //           ...task,
+  //           title: this.task, // Presuming 'this.task' contains the updated task title.
+  //           date: date,
+  //           // Add any other properties that might be updated during the edit.
+  //         };
+  //       } else {
+  //         return task;
+  //       }
+  //     });
+  
+  //     await chrome.storage.sync.set({ tasks: updatedTasks });
+  //   }
+  
+  //   this.task = '';
+  //   // this.loadTasks();
+  // }
 
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
@@ -199,8 +227,8 @@ class App extends LitElement {
   }
 
   render() {
-    console.log('this.tasks :>> ', this.tasks);
-
+    // console.log('this.tasks :>> ', this.tasks);
+    console.log('this.cardBeingEdited :>> ', this.cardBeingEdited);
     return html`
       <section class="main">
         <button @click=${this.deleteAllTasks}>delete all</button>
@@ -269,9 +297,26 @@ class App extends LitElement {
                             @click=${this.toggleInfinite}
                             .checked=${task.date === 'infinite' ? true : false}
                           />
-                          <button @click=${()=>{   const inputElement = this.shadowRoot.getElementById('task-edit-input')
-                                console.log('inputElement :>> ', inputElement.value);
-                          }}>click</button>
+                          <button
+                            style="z-index:100;"
+                            @click=${(e) => {
+                              e.stopPropagation();
+                              this.openEditingMode(task.id);
+                              this.cardBeingEditedId = '';
+                             
+                              const inputElement =
+                                this.shadowRoot.getElementById(
+                                  'task-edit-input'
+                                );
+                              console.log(
+                                'inputElement :>> ',
+                                inputElement.value
+                              );
+
+                            }}
+                          >
+                            click
+                          </button>
                         </form>`}
                   </div>
 
@@ -285,16 +330,17 @@ class App extends LitElement {
                   </div>
 
                   <div
-                    style="
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 5px;
-            "
+                    style="display: flex;justify-content: center;align-items: center; gap: 5px;"
                   >
                     <div
                       @click=${() => {
-                        this.openEditingMode(task.id);
+                        if (
+                          this.cardBeingEditedId === '' ||
+                          this.cardBeingEditedId === task.id
+                        ) {
+                          this.cardBeingEditedId = task.id;
+                          this.openEditingMode(task.id);
+                        }
                       }}
                     >
                       ${editIcon}
