@@ -65,10 +65,16 @@ class App extends LitElement {
       const storedDateString = storedTime.currentDate;
       const currentDateString = new Date().toLocaleDateString('en-US');
       if (storedDateString <= currentDateString && this.tasks.length !== 0) {
-        this.tasks.forEach((task) => {
-          if (task.isCompleted && task.date === 'infinite') {
-            task.isCompleted = false;
+        this.tasks = this.tasks.filter((task) => {
+          if (task.isCompleted) {
+            if (task.date === 'infinite') {
+              task.isCompleted = false;
+              return true; // keep in the array
+            }
+            // else clause, task is completed and date is not 'infinite'
+            return false; // remove from the array
           }
+          return true; // keep in the array
         });
         this.setTasks(this.tasks);
 
@@ -130,10 +136,10 @@ class App extends LitElement {
     );
     this.setTasks(this.tasks);
   }
-// Test this chatgpt code and see if it fits
+  // Test this chatgpt code and see if it fits
   // async editTask(taskId) {
   //   const { tasks } = await chrome.storage.sync.get('tasks');
-  
+
   //   if (tasks && tasks.length > 0) {
   //     let updatedTasks = tasks.map(task => {
   //       if (task.id === taskId) {
@@ -141,7 +147,7 @@ class App extends LitElement {
   //         if (this.isInfinite) {
   //           date = 'infinite';
   //         }
-  
+
   //         return {
   //           ...task,
   //           title: this.task, // Presuming 'this.task' contains the updated task title.
@@ -152,10 +158,10 @@ class App extends LitElement {
   //         return task;
   //       }
   //     });
-  
+
   //     await chrome.storage.sync.set({ tasks: updatedTasks });
   //   }
-  
+
   //   this.task = '';
   //   // this.loadTasks();
   // }
@@ -303,7 +309,7 @@ class App extends LitElement {
                               e.stopPropagation();
                               this.openEditingMode(task.id);
                               this.cardBeingEditedId = '';
-                             
+
                               const inputElement =
                                 this.shadowRoot.getElementById(
                                   'task-edit-input'
@@ -312,7 +318,6 @@ class App extends LitElement {
                                 'inputElement :>> ',
                                 inputElement.value
                               );
-
                             }}
                           >
                             click
