@@ -17,6 +17,9 @@ class App extends LitElement {
       .change-color-onhover:hover {
         color: red;
       }
+      .change-color-edit-onhover:hover {
+        color: blue;
+      }
     `,
   ];
 
@@ -26,6 +29,7 @@ class App extends LitElement {
       tasks: { type: Object },
       isInfinite: { type: Boolean },
       cardBeingEditedId: { type: String },
+      createNewTask: { type: Boolean },
     };
   }
 
@@ -46,6 +50,7 @@ class App extends LitElement {
     this.tasks = [];
     this.isInfinite = false;
     this.cardBeingEditedId = '';
+    this.createNewTask = false;
   }
 
   toggleInfinite() {
@@ -137,13 +142,14 @@ class App extends LitElement {
     this.setTasks(this.tasks);
   }
   // Test this chatgpt code and see if it fits
-  async editTask(taskId,title) {
+  async editTask(taskId, title) {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
     if (tasks && tasks.length > 0) {
-      let updatedTasks = tasks.map(task => {
+      let updatedTasks = tasks.map((task) => {
         if (task.id === taskId) {
           let date = new Date().toLocaleString('en-GB');
+          console.log('this.isInfininte :>> ', this.isInfinite);
           if (this.isInfinite) {
             date = 'infinite';
           }
@@ -217,6 +223,7 @@ class App extends LitElement {
 
   updated() {
     this.shadowRoot.getElementById('task-edit-input')?.focus();
+    this.shadowRoot.getElementById('task-edit-input2')?.focus();
   }
 
   generateId() {
@@ -237,29 +244,35 @@ class App extends LitElement {
     console.log('this.cardBeingEdited :>> ', this.cardBeingEdited);
     return html`
       <section class="main">
-        <button @click=${this.deleteAllTasks}>delete all</button>
-        <form
-          @submit=${(e) => {
-            e.preventDefault();
+        ${this.createNewTask
+          ? html`<button @click=${this.deleteAllTasks}>delete all</button>
+              <form
+                @submit=${(e) => {
+                  e.preventDefault();
 
-            this.saveTask2();
-          }}
-        >
-          <input
-            id="task-input"
-            .value=${this.task}
-            @input=${(e) => {
-              this.task = e.target.value;
-            }}
-            type="text"
-          />
-          <input
-            type="checkbox"
-            @click=${this.toggleInfinite}
-            .checked=${this.isInfinite}
-          />
-          <button type="submit">click</button>
-        </form>
+                  this.saveTask2();
+                  this.createNewTask = false;
+                }}
+              >
+                <input
+                  id="task-input"
+                  .value=${this.task}
+                  @input=${(e) => {
+                    this.task = e.target.value;
+                  }}
+                  type="text"
+                />
+                <input
+                  type="checkbox"
+                  @click=${(e) => {
+                    e.stopPropagation();
+                    this.toggleInfinite;
+                  }}
+                  .checked=${this.isInfinite}
+                />
+                <button type="submit">click</button>
+              </form>`
+          : html`<button @click=${() => (this.createNewTask = true)}>Create Task</button>`}
         ${!!this.tasks && this.tasks && this.tasks.length !== 0
           ? map(
               this.tasks.filter((task) => {
@@ -286,18 +299,16 @@ class App extends LitElement {
                           @submit=${(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                              this.openEditingMode(task.id);
-                              this.cardBeingEditedId = '';
+                            this.openEditingMode(task.id);
+                            this.cardBeingEditedId = '';
 
-                              const inputElement =
-                                this.shadowRoot.getElementById(
-                                  'task-edit-input'
-                                );
-                              console.log(
-                                'inputElement :>> ',
-                                inputElement.value
-                              );
-                              this.editTask(task.id,inputElement.value);
+                            const inputElement =
+                              this.shadowRoot.getElementById('task-edit-input');
+                            console.log(
+                              'inputElement :>> ',
+                              inputElement.value
+                            );
+                            this.editTask(task.id, inputElement.value);
                           }}
                         >
                           <input
@@ -311,34 +322,21 @@ class App extends LitElement {
                           />
                           <input
                             type="checkbox"
-                            @click=${this.toggleInfinite}
+                            @click=${(e) => {
+                              e.stopPropagation();
+                              this.toggleInfinite();
+                              console.log(
+                                'this.isInfinite :>> ',
+                                this.isInfinite
+                              );
+                            }}
                             .checked=${task.date === 'infinite' ? true : false}
                           />
-                          <button
-                            type="submit"
-                            style="z-index:100;"
-                            @click=${(e) => {
-                              // e.stopPropagation();
-                              // this.openEditingMode(task.id);
-                              // this.cardBeingEditedId = '';
-
-                              // const inputElement =
-                              //   this.shadowRoot.getElementById(
-                              //     'task-edit-input'
-                              //   );
-                              // console.log(
-                              //   'inputElement :>> ',
-                              //   inputElement.value
-                              // );
-                              // this.editTask(task.id,inputElement.value);
-                            }}
-                          >
+                          <button type="submit" style="z-index:100;">
                             click
                           </button>
                         </form>`}
                   </div>
-
-                  <!-- <div style="display: flex">${checkmark}</div> -->
                 </div>
 
                 <div id="divider"></div>
@@ -351,11 +349,20 @@ class App extends LitElement {
                     style="display: flex;justify-content: center;align-items: center; gap: 5px;"
                   >
                     <div
+                      class="change-color-edit-onhover"
+                      style="${task.isCompleted
+                        ? ' text-decoration: line-through; color: #b3b3b3;'
+                        : ''} "
                       @click=${() => {
+                        console.log(
+                          'this.cardBeingEditedId :>> ',
+                          this.cardBeingEditedId
+                        );
                         if (
                           this.cardBeingEditedId === '' ||
                           this.cardBeingEditedId === task.id
                         ) {
+                          console.log('asdasdasdasd');
                           this.cardBeingEditedId = task.id;
                           this.openEditingMode(task.id);
                         }
@@ -392,7 +399,41 @@ class App extends LitElement {
                       ? ' text-decoration: line-through; color: #b3b3b3;'
                       : ''}"
                   >
-                    ${task.title}
+                    ${!task.isEditMode
+                      ? task.title
+                      : html` <form
+                          @submit=${(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.openEditingMode(task.id);
+                            this.cardBeingEditedId = '';
+
+                            const inputElement =
+                              this.shadowRoot.getElementById(
+                                'task-edit-input2'
+                              );
+                            console.log(
+                              'inputElement :>> ',
+                              inputElement.value
+                            );
+                            this.editTask(task.id, inputElement.value);
+                          }}
+                        >
+                          <input
+                            id="task-edit-input2"
+                            style=" border: none;background: transparent;outline: none;box-shadow: none;"
+                            .value=${task.title}
+                            type="text"
+                          />
+                          <input
+                            type="checkbox"
+                            @click=${() => this.toggleInfinite()}
+                            .checked=${task.date === 'infinite' ? true : false}
+                          />
+                          <button type="submit" style="z-index:100;">
+                            click
+                          </button>
+                        </form>`}
                   </div>
                 </div>
 
@@ -403,17 +444,23 @@ class App extends LitElement {
                   </div>
 
                   <div
-                    style="
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              gap: 5px;
-            "
+                    style="display: flex;justify-content: center;align-items:center;gap: 5px;"
                   >
                     <div
+                      class="change-color-edit-onhover"
                       style="${task.isCompleted
                         ? ' text-decoration: line-through; color: #b3b3b3;'
                         : ''} "
+                      @click=${() => {
+                        console.log('ASD');
+                        if (
+                          this.cardBeingEditedId === '' ||
+                          this.cardBeingEditedId === task.id
+                        ) {
+                          this.cardBeingEditedId = task.id;
+                          this.openEditingMode(task.id);
+                        }
+                      }}
                     >
                       ${editIcon}
                     </div>
