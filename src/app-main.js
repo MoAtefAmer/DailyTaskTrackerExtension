@@ -137,34 +137,34 @@ class App extends LitElement {
     this.setTasks(this.tasks);
   }
   // Test this chatgpt code and see if it fits
-  // async editTask(taskId) {
-  //   const { tasks } = await chrome.storage.sync.get('tasks');
+  async editTask(taskId,title) {
+    const { tasks } = await chrome.storage.sync.get('tasks');
 
-  //   if (tasks && tasks.length > 0) {
-  //     let updatedTasks = tasks.map(task => {
-  //       if (task.id === taskId) {
-  //         let date = new Date().toLocaleString('en-GB');
-  //         if (this.isInfinite) {
-  //           date = 'infinite';
-  //         }
+    if (tasks && tasks.length > 0) {
+      let updatedTasks = tasks.map(task => {
+        if (task.id === taskId) {
+          let date = new Date().toLocaleString('en-GB');
+          if (this.isInfinite) {
+            date = 'infinite';
+          }
 
-  //         return {
-  //           ...task,
-  //           title: this.task, // Presuming 'this.task' contains the updated task title.
-  //           date: date,
-  //           // Add any other properties that might be updated during the edit.
-  //         };
-  //       } else {
-  //         return task;
-  //       }
-  //     });
+          return {
+            ...task,
+            title: title, // Presuming 'this.task' contains the updated task title.
+            date: date,
+            // Add any other properties that might be updated during the edit.
+          };
+        } else {
+          return task;
+        }
+      });
 
-  //     await chrome.storage.sync.set({ tasks: updatedTasks });
-  //   }
+      await chrome.storage.sync.set({ tasks: updatedTasks });
+    }
 
-  //   this.task = '';
-  //   // this.loadTasks();
-  // }
+    // this.task = '';
+    this.loadTasks();
+  }
 
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
@@ -285,8 +285,19 @@ class App extends LitElement {
                       : html` <form
                           @submit=${(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
+                              this.openEditingMode(task.id);
+                              this.cardBeingEditedId = '';
 
-                            // this.saveTask2();
+                              const inputElement =
+                                this.shadowRoot.getElementById(
+                                  'task-edit-input'
+                                );
+                              console.log(
+                                'inputElement :>> ',
+                                inputElement.value
+                              );
+                              this.editTask(task.id,inputElement.value);
                           }}
                         >
                           <input
@@ -304,20 +315,22 @@ class App extends LitElement {
                             .checked=${task.date === 'infinite' ? true : false}
                           />
                           <button
+                            type="submit"
                             style="z-index:100;"
                             @click=${(e) => {
-                              e.stopPropagation();
-                              this.openEditingMode(task.id);
-                              this.cardBeingEditedId = '';
+                              // e.stopPropagation();
+                              // this.openEditingMode(task.id);
+                              // this.cardBeingEditedId = '';
 
-                              const inputElement =
-                                this.shadowRoot.getElementById(
-                                  'task-edit-input'
-                                );
-                              console.log(
-                                'inputElement :>> ',
-                                inputElement.value
-                              );
+                              // const inputElement =
+                              //   this.shadowRoot.getElementById(
+                              //     'task-edit-input'
+                              //   );
+                              // console.log(
+                              //   'inputElement :>> ',
+                              //   inputElement.value
+                              // );
+                              // this.editTask(task.id,inputElement.value);
                             }}
                           >
                             click
