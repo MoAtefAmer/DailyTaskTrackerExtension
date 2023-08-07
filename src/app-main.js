@@ -20,6 +20,29 @@ class App extends LitElement {
       .change-color-edit-onhover:hover {
         color: blue;
       }
+      #task-input {
+        border: none;
+        border-radius: 5px;
+        /* background: #f5f5f5; */
+        outline: none;
+        box-shadow: none;
+        padding: 0.5rem;
+      }
+      #create-task-form {
+        display: flex;
+        margin: 1rem;
+        background-color: white;
+        border-radius: 5px;
+        padding: 1rem;
+      }
+
+      .submit-button {
+        border: none;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: #2563eb;
+        color: white;
+      }
     `,
   ];
 
@@ -224,6 +247,7 @@ class App extends LitElement {
   updated() {
     this.shadowRoot.getElementById('task-edit-input')?.focus();
     this.shadowRoot.getElementById('task-edit-input2')?.focus();
+    this.shadowRoot.getElementById('task-input')?.focus();
   }
 
   generateId() {
@@ -245,8 +269,12 @@ class App extends LitElement {
     return html`
       <section class="main">
         ${this.createNewTask
-          ? html`<button @click=${this.deleteAllTasks}>delete all</button>
+          ? html` <div>
+                <button @click=${this.deleteAllTasks}>delete all</button>
+                ${this.createNewTask? html`<button @click="${()=>this.createNewTask = false}">Close</button>`:''}
+              </div>
               <form
+                id="create-task-form"
                 @submit=${(e) => {
                   e.preventDefault();
 
@@ -254,25 +282,46 @@ class App extends LitElement {
                   this.createNewTask = false;
                 }}
               >
-                <input
-                  id="task-input"
-                  .value=${this.task}
-                  @input=${(e) => {
-                    this.task = e.target.value;
-                  }}
-                  type="text"
-                />
-                <input
-                  type="checkbox"
-                  @click=${(e) => {
-                    e.stopPropagation();
-                    this.toggleInfinite;
-                  }}
-                  .checked=${this.isInfinite}
-                />
-                <button type="submit">click</button>
+                <div
+                  style="display:flex;align-items:center;justify-content:center;"
+                >
+                  <input
+                    id="task-input"
+                    .value=${this.task}
+                    @input=${(e) => {
+                      this.task = e.target.value;
+                    }}
+                    type="text"
+                  />
+                </div>
+
+                <div style="display:flex;align-items:center;margin:1rem;">
+                  <label>
+                    <input
+                      id="normal"
+                      type="checkbox"
+                      @click=${(e) => {
+                        e.stopPropagation();
+                        this.toggleInfinite();
+                        console.log('this.infinite :>> ', this.isInfinite);
+                      }}
+                      .checked=${this.isInfinite}
+                    />
+                  </label>
+                </div>
+                <div style="display:flex;align-items:center;">
+                  <button
+                    class="submit-button"
+                    style="cursor:pointer;"
+                    type="submit"
+                  >
+                    Create
+                  </button>
+                </div>
               </form>`
-          : html`<button @click=${() => (this.createNewTask = true)}>Create Task</button>`}
+          : html`<button class="submit-button" style="cursor:pointer;" @click=${() => (this.createNewTask = true)}>
+              Create Task
+            </button>`}
         ${!!this.tasks && this.tasks && this.tasks.length !== 0
           ? map(
               this.tasks.filter((task) => {
