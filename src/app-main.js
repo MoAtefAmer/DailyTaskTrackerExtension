@@ -65,6 +65,7 @@ class App extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this.calculateDailyQuests();
   }
 
   constructor() {
@@ -83,14 +84,17 @@ class App extends LitElement {
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
     // chrome.storage.local.set({ currentDate: "7/26/2023" });
-
+    console.log('storedDateString :>> ', storedTime.currentDate);
+    console.log('new Date().toLocaleDateString :>> ', new Date().toLocaleDateString('en-US'));
     if (
       storedTime?.currentDate?.length === 0 ||
       storedTime?.currentDate === undefined
     ) {
+      console.log("a8a7a7a");
       chrome.storage.local.set({ currentDate: this.getNextDayDate() });
     } else {
       const storedDateString = storedTime.currentDate;
+      
       const currentDateString = new Date().toLocaleDateString('en-US');
       if (storedDateString <= currentDateString && this.tasks.length !== 0) {
         this.tasks = this.tasks.filter((task) => {
@@ -109,6 +113,7 @@ class App extends LitElement {
         chrome.storage.local.set({ currentDate: this.getNextDayDate() });
       }
     }
+
   }
 
   async deleteAllTasks() {
@@ -241,7 +246,7 @@ class App extends LitElement {
 
   async firstUpdated() {
     await this.loadTasks();
-    this.calculateDailyQuests();
+    // this.calculateDailyQuests();
   }
 
   updated() {
