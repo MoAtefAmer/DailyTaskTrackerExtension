@@ -63,8 +63,9 @@ class App extends LitElement {
     return nextDay.toLocaleDateString('en-US');
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
+    await this.loadTasks();
     this.calculateDailyQuests();
   }
 
@@ -83,37 +84,34 @@ class App extends LitElement {
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
+    const storedDateString = storedTime.currentDate;
+
     // chrome.storage.local.set({ currentDate: "7/26/2023" });
     console.log('storedDateString :>> ', storedTime.currentDate);
     console.log('new Date().toLocaleDateString :>> ', new Date().toLocaleDateString('en-US'));
-    if (
-      storedTime?.currentDate?.length === 0 ||
-      storedTime?.currentDate === undefined
-    ) {
-      console.log("a8a7a7a");
-      chrome.storage.local.set({ currentDate: this.getNextDayDate() });
-    } else {
-      const storedDateString = storedTime.currentDate;
+    const todaysDate = new Date().toLocaleDateString('en-US');
+
+    if(storedDateString <=todaysDate){
+        console.log("stored time is less than todays date");
+        if (this.tasks.length !== 0) {
+          console.log("sdasdasd");
+              this.tasks = this.tasks.filter((task) => {
+                if (task.isCompleted) {
+                  if (task.date === 'infinite') {
+                    task.isCompleted = false;
+                    return true; // keep in the array
+                  }
+                  // else clause, task is completed and date is not 'infinite'
+                  return false; // remove from the array
+                }
+                return true; // keep in the array
+              });
+              this.setTasks(this.tasks);
       
-      const currentDateString = new Date().toLocaleDateString('en-US');
-      if (storedDateString <= currentDateString && this.tasks.length !== 0) {
-        this.tasks = this.tasks.filter((task) => {
-          if (task.isCompleted) {
-            if (task.date === 'infinite') {
-              task.isCompleted = false;
-              return true; // keep in the array
+              chrome.storage.local.set({ currentDate: this.getNextDayDate() });
             }
-            // else clause, task is completed and date is not 'infinite'
-            return false; // remove from the array
-          }
-          return true; // keep in the array
-        });
-        this.setTasks(this.tasks);
-
-        chrome.storage.local.set({ currentDate: this.getNextDayDate() });
-      }
+        
     }
-
   }
 
   async deleteAllTasks() {
@@ -245,7 +243,7 @@ class App extends LitElement {
   }
 
   async firstUpdated() {
-    await this.loadTasks();
+    // await this.loadTasks();
     // this.calculateDailyQuests();
   }
 
