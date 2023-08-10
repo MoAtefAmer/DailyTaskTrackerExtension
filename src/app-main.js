@@ -84,7 +84,13 @@ class App extends LitElement {
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
+    console.log('storedTime :>> ', storedTime);
     const storedDateString = storedTime.currentDate;
+    // init
+    if(storedTime.currentDate === undefined){
+      chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+      storedTime = await chrome.storage.local.get('currentDate');
+    }
 
     // chrome.storage.local.set({ currentDate: "7/26/2023" });
     console.log('storedDateString :>> ', storedTime.currentDate);
