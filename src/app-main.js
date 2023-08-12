@@ -3,6 +3,7 @@ import { map } from 'lit/directives/map.js';
 import { sharedStyles } from '../styles.js';
 import { checkmark, editIcon, trashIcon } from '../icons.js';
 import './components/delete-button.js';
+import { classMap } from 'lit/directives/class-map.js';
 
 class App extends LitElement {
   static styles = [
@@ -43,6 +44,32 @@ class App extends LitElement {
         background-color: #2563eb;
         color: white;
       }
+
+      .collapse {
+        display: none;
+        opacity: 0;
+
+        transform: translateY(-20px);
+        transition: opacity 500ms ease-in, transform 500ms ease-in;
+      }
+      .collapse-anim {
+        display: block;
+      }
+      .collapse-open {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .collapse {
+          transition: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .collapsible {
+          transition: none;
+        }
+      }
     `,
   ];
 
@@ -53,6 +80,8 @@ class App extends LitElement {
       isInfinite: { type: Boolean },
       cardBeingEditedId: { type: String },
       createNewTask: { type: Boolean },
+      isDailyAccOpen: { type: Boolean },
+      _state: { type: String },
     };
   }
 
@@ -76,6 +105,9 @@ class App extends LitElement {
     this.isInfinite = false;
     this.cardBeingEditedId = '';
     this.createNewTask = false;
+    this.isDailyAccOpen = false;
+    this._state = 'closed';
+    
   }
 
   toggleInfinite() {
@@ -251,11 +283,34 @@ class App extends LitElement {
     // this.calculateDailyQuests();
   }
 
-  updated() {
+  async updated(changedProperties) {
+    super.updated(changedProperties)
     this.shadowRoot.getElementById('task-edit-input')?.focus();
     this.shadowRoot.getElementById('task-edit-input2')?.focus();
     this.shadowRoot.getElementById('task-input')?.focus();
+  console.log('changedProperties :>> ', changedProperties);    
+    if (!changedProperties.has('isDailyAccOpen')) return
+
+    if (this.isDailyAccOpen === true && this._state === 'closed') {
+      this._state = 'collapse-open'
+      await new Promise((r) => setTimeout(r, 0))
+      this._state = 'opened'
+    } else {
+      const container = this.shadowRoot.querySelector('.collapse')
+      if (!this.isDailyAccOpen && container) {
+        container.addEventListener(
+          'transitionend',
+          () => (this._state = 'closed'),
+          {
+            once: true,
+          }
+        )
+        this._state = 'collapse-close'
+      }
+    }
   }
+
+
 
   generateId() {
     return (
@@ -272,6 +327,12 @@ class App extends LitElement {
 
   render() {
     // console.log('this.tasks :>> ', this.tasks);
+    const classes = {
+      collapse: true,
+      'collapse-anim':
+        this._state === 'collapse-open' || this._state === 'collapse-close',
+      'collapse-open': this._state === 'opened',
+    };
     return html`
       <section class="main">
         ${this.createNewTask
@@ -340,115 +401,123 @@ class App extends LitElement {
             >
               Create Task
             </button>`}
-        ${!!this.tasks && this.tasks && this.tasks.length !== 0
-          ? map(
-              this.tasks.filter((task) => {
-                if (task?.date === 'infinite') return task;
-              }),
-              (task) => html` <div class="quest-card">
-                <div
-                  class="flex-between"
-                  @click=${() => {
-                    if (!task.isEditMode) {
-                      this.completeTask(task.id);
-                    }
-                  }}
-                >
-                  <div
-                    class="task-title"
-                    style="${task.isCompleted
-                      ? ' text-decoration: line-through; color: #b3b3b3;'
-                      : ''}"
-                  >
-                    ${task.isEditMode && this.createNewTask === false
-                      ? html` <form
-                          @submit=${(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            this.openEditingMode(task.id);
-                            this.cardBeingEditedId = '';
-
-                            const inputElement =
-                              this.shadowRoot.getElementById('task-edit-input');
-                            this.editTask(task.id, inputElement.value);
-                          }}
-                        >
-                          <input
-                            id="task-edit-input"
-                            style=" border: none;background: transparent;outline: none;box-shadow: none;"
-                            .value=${task.title}
-                            @input=${(e) => {
-                              // console.log('As the hours pass :>> ', e.target.value);
-                            }}
-                            type="text"
-                          />
-                          <input
-                            type="checkbox"
-                            @click=${(e) => {
-                              e.stopPropagation();
-                              this.toggleInfinite();
-                              console.log(
-                                'this.isInfinite :>> ',
-                                this.isInfinite
-                              );
-                            }}
-                            .checked=${task.date === 'infinite' ? true : false}
-                          />
-                          <button
-                            type="submit"
-                            class="submit-button"
-                            style="background:green;;z-index:100;"
-                          >
-                            edit
-                          </button>
-                        </form>`
-                      : task.title}
-                  </div>
-                </div>
-
-                <div id="divider"></div>
-                <div class="flex-between">
-                  <div class="timestamp">
-                    ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
-                  </div>
-
-                  <div
-                    style="display: flex;justify-content: center;align-items: center; gap: 5px;"
-                  >
+        <button @click=${() => (this.isDailyAccOpen = !this.isDailyAccOpen)}>
+          Open Acc
+        </button>
+        ${this.isDailyAccOpen
+          ? html` ${!!this.tasks && this.tasks && this.tasks.length !== 0
+              ? map(
+                  this.tasks.filter((task) => {
+                    if (task?.date === 'infinite') return task;
+                  }),
+                  (task) => html` <div  class="quest-card ${classMap(classes)}">
                     <div
-                      class="change-color-edit-onhover"
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''} "
+                      class="flex-between"
                       @click=${() => {
-
-                        if (this.createNewTask === false) {
-                          if (
-                            this.cardBeingEditedId === '' ||
-                            this.cardBeingEditedId === task.id
-                          ) {
-                            this.cardBeingEditedId = task.id;
-                            this.openEditingMode(task.id);
-                          }
+                        if (!task.isEditMode) {
+                          this.completeTask(task.id);
                         }
                       }}
                     >
-                      ${editIcon}
+                      <div
+                        class="task-title"
+                        style="${task.isCompleted
+                          ? ' text-decoration: line-through; color: #b3b3b3;'
+                          : ''}"
+                      >
+                        ${task.isEditMode && this.createNewTask === false
+                          ? html` <form
+                              @submit=${(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                this.openEditingMode(task.id);
+                                this.cardBeingEditedId = '';
+
+                                const inputElement =
+                                  this.shadowRoot.getElementById(
+                                    'task-edit-input'
+                                  );
+                                this.editTask(task.id, inputElement.value);
+                              }}
+                            >
+                              <input
+                                id="task-edit-input"
+                                style=" border: none;background: transparent;outline: none;box-shadow: none;"
+                                .value=${task.title}
+                                @input=${(e) => {
+                                  // console.log('As the hours pass :>> ', e.target.value);
+                                }}
+                                type="text"
+                              />
+                              <input
+                                type="checkbox"
+                                @click=${(e) => {
+                                  e.stopPropagation();
+                                  this.toggleInfinite();
+                                  console.log(
+                                    'this.isInfinite :>> ',
+                                    this.isInfinite
+                                  );
+                                }}
+                                .checked=${task.date === 'infinite'
+                                  ? true
+                                  : false}
+                              />
+                              <button
+                                type="submit"
+                                class="submit-button"
+                                style="background:green;;z-index:100;"
+                              >
+                                edit
+                              </button>
+                            </form>`
+                          : task.title}
+                      </div>
                     </div>
 
-                    <div
-                      class="change-color-onhover"
-                      @click=${(e) => this.deleteTask(task.id)}
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''}"
-                    >
-                      ${trashIcon}
+                    <div id="divider"></div>
+                    <div class="flex-between">
+                      <div class="timestamp">
+                        ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
+                      </div>
+
+                      <div
+                        style="display: flex;justify-content: center;align-items: center; gap: 5px;"
+                      >
+                        <div
+                          class="change-color-edit-onhover"
+                          style="${task.isCompleted
+                            ? ' text-decoration: line-through; color: #b3b3b3;'
+                            : ''} "
+                          @click=${() => {
+                            if (this.createNewTask === false) {
+                              if (
+                                this.cardBeingEditedId === '' ||
+                                this.cardBeingEditedId === task.id
+                              ) {
+                                this.cardBeingEditedId = task.id;
+                                this.openEditingMode(task.id);
+                              }
+                            }
+                          }}
+                        >
+                          ${editIcon}
+                        </div>
+
+                        <div
+                          class="change-color-onhover"
+                          @click=${(e) => this.deleteTask(task.id)}
+                          style="${task.isCompleted
+                            ? ' text-decoration: line-through; color: #b3b3b3;'
+                            : ''}"
+                        >
+                          ${trashIcon}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>`
-            )
+                  </div>`
+                )
+              : ''}`
           : ''}
         ${!!this.tasks && this.tasks && this.tasks.length !== 0
           ? map(
