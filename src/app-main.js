@@ -84,39 +84,38 @@ class App extends LitElement {
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
-    console.log('storedTime :>> ', storedTime);
     const storedDateString = storedTime.currentDate;
     // init
-    if(storedTime.currentDate === undefined){
+    if (storedTime.currentDate === undefined) {
       chrome.storage.local.set({ currentDate: this.getNextDayDate() });
       storedTime = await chrome.storage.local.get('currentDate');
     }
 
     // chrome.storage.local.set({ currentDate: "7/26/2023" });
-    console.log('storedDateString :>> ', storedTime.currentDate);
-    console.log('new Date().toLocaleDateString :>> ', new Date().toLocaleDateString('en-US'));
+    // console.log('storedDateString :>> ', storedTime.currentDate);
+    // console.log(
+    //   'new Date().toLocaleDateString :>> ',
+    //   new Date().toLocaleDateString('en-US')
+    // );
     const todaysDate = new Date().toLocaleDateString('en-US');
 
-    if(storedDateString <=todaysDate){
-        console.log("stored time is less than todays date");
-        if (this.tasks.length !== 0) {
-          console.log("sdasdasd");
-              this.tasks = this.tasks.filter((task) => {
-                if (task.isCompleted) {
-                  if (task.date === 'infinite') {
-                    task.isCompleted = false;
-                    return true; // keep in the array
-                  }
-                  // else clause, task is completed and date is not 'infinite'
-                  return false; // remove from the array
-                }
-                return true; // keep in the array
-              });
-              this.setTasks(this.tasks);
-      
-              chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+    if (storedDateString <= todaysDate) {
+      if (this.tasks.length !== 0) {
+        this.tasks = this.tasks.filter((task) => {
+          if (task.isCompleted) {
+            if (task.date === 'infinite') {
+              task.isCompleted = false;
+              return true; // keep in the array
             }
-        
+            // else clause, task is completed and date is not 'infinite'
+            return false; // remove from the array
+          }
+          return true; // keep in the array
+        });
+        this.setTasks(this.tasks);
+
+        chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+      }
     }
   }
 
@@ -181,7 +180,6 @@ class App extends LitElement {
       let updatedTasks = tasks.map((task) => {
         if (task.id === taskId) {
           let date = new Date().toLocaleString('en-GB');
-          console.log('this.isInfininte :>> ', this.isInfinite);
           if (this.isInfinite) {
             date = 'infinite';
           }
@@ -274,13 +272,21 @@ class App extends LitElement {
 
   render() {
     // console.log('this.tasks :>> ', this.tasks);
-    console.log('this.cardBeingEdited :>> ', this.cardBeingEdited);
     return html`
       <section class="main">
         ${this.createNewTask
           ? html` <div>
-                <button @click=${this.deleteAllTasks}>delete all</button>
-                ${this.createNewTask? html`<button @click="${()=>this.createNewTask = false}">Close</button>`:''}
+                <!-- <button @click=${this
+                  .deleteAllTasks}>delete all</button> -->
+                ${this.createNewTask
+                  ? html`<button
+                      style="background:red;cursor:pointer;"
+                      class="submit-button"
+                      @click="${() => (this.createNewTask = false)}"
+                    >
+                      Close
+                    </button>`
+                  : ''}
               </div>
               <form
                 id="create-task-form"
@@ -312,7 +318,6 @@ class App extends LitElement {
                       @click=${(e) => {
                         e.stopPropagation();
                         this.toggleInfinite();
-                        console.log('this.infinite :>> ', this.isInfinite);
                       }}
                       .checked=${this.isInfinite}
                     />
@@ -328,7 +333,11 @@ class App extends LitElement {
                   </button>
                 </div>
               </form>`
-          : html`<button class="submit-button" style="cursor:pointer;" @click=${() => (this.createNewTask = true)}>
+          : html`<button
+              class="submit-button"
+              style="cursor:pointer;"
+              @click=${() => (this.createNewTask = true)}
+            >
               Create Task
             </button>`}
         ${!!this.tasks && this.tasks && this.tasks.length !== 0
@@ -351,9 +360,8 @@ class App extends LitElement {
                       ? ' text-decoration: line-through; color: #b3b3b3;'
                       : ''}"
                   >
-                    ${!task.isEditMode
-                      ? task.title
-                      : html` <form
+                    ${task.isEditMode && this.createNewTask === false
+                      ? html` <form
                           @submit=${(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -362,10 +370,6 @@ class App extends LitElement {
 
                             const inputElement =
                               this.shadowRoot.getElementById('task-edit-input');
-                            console.log(
-                              'inputElement :>> ',
-                              inputElement.value
-                            );
                             this.editTask(task.id, inputElement.value);
                           }}
                         >
@@ -390,10 +394,15 @@ class App extends LitElement {
                             }}
                             .checked=${task.date === 'infinite' ? true : false}
                           />
-                          <button type="submit" style="z-index:100;">
-                            click
+                          <button
+                            type="submit"
+                            class="submit-button"
+                            style="background:green;;z-index:100;"
+                          >
+                            edit
                           </button>
-                        </form>`}
+                        </form>`
+                      : task.title}
                   </div>
                 </div>
 
@@ -412,17 +421,15 @@ class App extends LitElement {
                         ? ' text-decoration: line-through; color: #b3b3b3;'
                         : ''} "
                       @click=${() => {
-                        console.log(
-                          'this.cardBeingEditedId :>> ',
-                          this.cardBeingEditedId
-                        );
-                        if (
-                          this.cardBeingEditedId === '' ||
-                          this.cardBeingEditedId === task.id
-                        ) {
-                          console.log('asdasdasdasd');
-                          this.cardBeingEditedId = task.id;
-                          this.openEditingMode(task.id);
+
+                        if (this.createNewTask === false) {
+                          if (
+                            this.cardBeingEditedId === '' ||
+                            this.cardBeingEditedId === task.id
+                          ) {
+                            this.cardBeingEditedId = task.id;
+                            this.openEditingMode(task.id);
+                          }
                         }
                       }}
                     >
@@ -457,9 +464,8 @@ class App extends LitElement {
                       ? ' text-decoration: line-through; color: #b3b3b3;'
                       : ''}"
                   >
-                    ${!task.isEditMode
-                      ? task.title
-                      : html` <form
+                    ${task.isEditMode && this.createNewTask === false
+                      ? html` <form
                           @submit=${(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -488,10 +494,15 @@ class App extends LitElement {
                             @click=${() => this.toggleInfinite()}
                             .checked=${task.date === 'infinite' ? true : false}
                           />
-                          <button type="submit" style="z-index:100;">
-                            click
+                          <button
+                            class="submit-button"
+                            type="submit"
+                            style="background:green;z-index:100;"
+                          >
+                            edit
                           </button>
-                        </form>`}
+                        </form>`
+                      : task.title}
                   </div>
                 </div>
 
@@ -510,13 +521,14 @@ class App extends LitElement {
                         ? ' text-decoration: line-through; color: #b3b3b3;'
                         : ''} "
                       @click=${() => {
-                        console.log('ASD');
-                        if (
-                          this.cardBeingEditedId === '' ||
-                          this.cardBeingEditedId === task.id
-                        ) {
-                          this.cardBeingEditedId = task.id;
-                          this.openEditingMode(task.id);
+                        if (this.createNewTask === false) {
+                          if (
+                            this.cardBeingEditedId === '' ||
+                            this.cardBeingEditedId === task.id
+                          ) {
+                            this.cardBeingEditedId = task.id;
+                            this.openEditingMode(task.id);
+                          }
                         }
                       }}
                     >
