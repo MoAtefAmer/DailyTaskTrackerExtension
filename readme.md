@@ -1,3 +1,6 @@
+## WE ARE LIVE!! 🚀
+https://chrome.google.com/webstore/detail/dquest/chefkapebbalealkmddchbpgeffnjaio
+
 ## Daily Quests
 This is a simple todo chrome extension to help you setup your daily tasks which refresh when the day ends. You can also add one-time tasks and use it as a normal todolist.
 
