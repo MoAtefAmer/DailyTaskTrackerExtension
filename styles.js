@@ -1,6 +1,9 @@
 import { css } from 'lit';
+import  {spacing}  from './spacing.js';
+
 
 export const sharedStyles = css`
+  ${spacing}
 
   .main {
     min-width: 300px;

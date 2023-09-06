@@ -91,12 +91,6 @@ class App extends LitElement {
       storedTime = await chrome.storage.local.get('currentDate');
     }
 
-    // chrome.storage.local.set({ currentDate: "7/26/2023" });
-    // console.log('storedDateString :>> ', storedTime.currentDate);
-    // console.log(
-    //   'new Date().toLocaleDateString :>> ',
-    //   new Date().toLocaleDateString('en-US')
-    // );
     const todaysDate = new Date().toLocaleDateString('en-US');
 
     if (storedDateString <= todaysDate) {
@@ -246,10 +240,7 @@ class App extends LitElement {
     this.loadTasks();
   }
 
-  async firstUpdated() {
-    // await this.loadTasks();
-    // this.calculateDailyQuests();
-  }
+
 
   updated() {
     this.shadowRoot.getElementById('task-edit-input')?.focus();
@@ -334,7 +325,7 @@ class App extends LitElement {
                 </div>
               </form>`
           : html`<button
-              class="submit-button"
+              class="submit-button "
               style="cursor:pointer;"
               @click=${() => (this.createNewTask = true)}
             >

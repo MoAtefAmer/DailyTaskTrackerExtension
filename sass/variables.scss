@@ -1,0 +1,40 @@
+$spacer: 1rem !default;
+$spacers: () !default;
+$spacers: map-merge((0: 0,
+    1: ($spacer * 0.25,
+    ),
+    2: ($spacer * 0.5,
+    ),
+    3: ($spacer * 0.75,
+    ),
+    4: $spacer,
+    5: ($spacer * 1.25,
+    ),
+    6: ($spacer * 1.5,
+    ),
+    7: ($spacer * 1.75,
+    ),
+    8: ($spacer * 2,
+    ),
+    9: ($spacer * 2.25,
+    ),
+    10: ($spacer * 2.5,
+      /* 40px */
+    ),
+    11: ($spacer * 2.75,
+    ),
+    12: ($spacer * 3,
+      /* 48px */
+    ),
+    25: ($spacer * 6.25,
+      /* 48px */
+    ),
+  ),
+  $spacers);
+
+// Please add your colors here
+$colors: (
+
+  )
+  
+
