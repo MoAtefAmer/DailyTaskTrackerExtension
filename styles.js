@@ -3,8 +3,8 @@ import { css } from 'lit';
 export const sharedStyles = css`
 
   .main {
-    min-width: 300px;
-    min-height: 300px;
+    min-width: 400px;
+    min-height: 500px;
 
     background-color: #f5f5f5;
     display: flex;

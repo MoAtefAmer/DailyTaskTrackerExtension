@@ -436,15 +436,7 @@ class App extends LitElement {
                       ${editIcon}
                     </div>
 
-                    <div
-                      class="change-color-onhover"
-                      @click=${(e) => this.deleteTask(task.id)}
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''}"
-                    >
-                      ${trashIcon}
-                    </div>
+                    <delete-button @delete-task='${()=>this.deleteTask(task.id)}'> </delete-button>
                   </div>
                 </div>
               </div>`
@@ -534,16 +526,8 @@ class App extends LitElement {
                     >
                       ${editIcon}
                     </div>
-
-                    <div
-                      class="change-color-onhover"
-                      @click=${(e) => this.deleteTask(task.id)}
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''}"
-                    >
-                      ${trashIcon}
-                    </div>
+                    <delete-button @delete-task='${()=>this.deleteTask(task.id)}'> </delete-button>
+                   
                   </div>
                 </div>
               </div>`
