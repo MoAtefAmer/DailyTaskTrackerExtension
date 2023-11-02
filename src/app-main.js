@@ -257,33 +257,19 @@ class App extends LitElement {
       Math.random().toString(36).substring(2, 15)
     );
   }
-
   sortTasks(tasks) {
-    // Sort the array by infinte then by date
-    console.log('tasks :>> ', tasks);
-
-    let infiniteTasks = [];
-    let datedTasks = [];
-    let completedTasks = [];
-
-    tasks.filter((task) => {
-      if (task?.date === 'infinite' && task?.isCompleted === false) {
-        infiniteTasks.push(task);
-        return true;
+    tasks.sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) {
+        return a.isCompleted ? 1 : -1;
       }
-
-      if (task?.date !== 'infinite' && task?.isCompleted === false) {
-        datedTasks.push(task);
-        return true;
+      if (a.date !== b.date) {
+        return a.date === 'infinite' ? -1 : 1;
       }
-
-      completedTasks.push(task);
+      return 0;
     });
-    let combinedTasks = [...infiniteTasks, ...datedTasks, ...completedTasks];
-    console.log('combinedTasks :>> ', combinedTasks);
-    return combinedTasks;
-  }
 
+    return tasks;
+}
   async loadTasks() {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
