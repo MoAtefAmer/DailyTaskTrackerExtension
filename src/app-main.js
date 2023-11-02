@@ -248,11 +248,6 @@ class App extends LitElement {
     this.loadTasks();
   }
 
-  async firstUpdated() {
-    // await this.loadTasks();
-    // this.calculateDailyQuests();
-  }
-
   updated() {
     this.shadowRoot.getElementById('task-edit-input')?.focus();
     this.shadowRoot.getElementById('task-edit-input2')?.focus();
@@ -269,7 +264,22 @@ class App extends LitElement {
   async loadTasks() {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
-    this.tasks = tasks;
+    // Sort the array by infinte then by date
+    console.log('tasks :>> ', tasks);
+
+    let infiniteTasks = [];
+    let datedTasks = [];
+
+    tasks.filter((task) => {
+      if (task?.date === 'infinite') {
+        infiniteTasks.push(task);
+      } else {
+        datedTasks.push(task);
+      }
+    });
+    let combinedTasks = [...infiniteTasks, ...datedTasks];
+    this.tasks = combinedTasks;
+    console.log('combinedTasks :>> ', combinedTasks);
   }
 
   handleEdit(taskId) {
@@ -355,9 +365,7 @@ class App extends LitElement {
             </button>`}
         ${!!this.tasks && this.tasks && this.tasks.length !== 0
           ? map(
-              this.tasks.filter((task) => {
-                if (task?.date === 'infinite') return task;
-              }),
+              this.tasks,
               (task) => html` <div class="quest-card">
                 <div
                   class="flex-between"
@@ -369,33 +377,33 @@ class App extends LitElement {
                 >
                   <div
                     class="task-title"
-                    style="${task.isCompleted
+                    style="${task?.isCompleted
                       ? ' text-decoration: line-through; color: #b3b3b3;'
                       : ''}"
                   >
-                    ${task.isEditMode && this.createNewTask === false
+                    ${task?.isEditMode && this.createNewTask === false
                       ? html` <form
                           @submit=${(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            this.openEditingMode(task.id);
+                            this.openEditingMode(task?.id);
                             this.cardBeingEditedId = '';
 
                             const inputElement =
                               this.shadowRoot.getElementById('task-edit-input');
-                            this.editTask(task.id, inputElement.value);
+                            this.editTask(task?.id, inputElement.value);
                           }}
                         >
                           <input
                             id="task-edit-input"
                             style=" border: none;background: transparent;outline: none;box-shadow: none;"
-                            .value=${task.title}
+                            .value=${task?.title}
                             @input=${(e) => {
                               // console.log('As the hours pass :>> ', e.target.value);
                             }}
                             type="text"
                             minlength="1"
-                            maxlength='${this.maxLengthCharInput}'
+                            maxlength="${this.maxLengthCharInput}"
                           />
                           <input
                             type="checkbox"
@@ -407,7 +415,7 @@ class App extends LitElement {
                                 this.isInfinite
                               );
                             }}
-                            .checked=${task.date === 'infinite' ? true : false}
+                            .checked=${task?.date === 'infinite' ? true : false}
                           />
                           <button
                             type="submit"
@@ -417,108 +425,27 @@ class App extends LitElement {
                             edit
                           </button>
                         </form>`
-                      : task.title}
+                      : task?.title}
                   </div>
                 </div>
 
                 <div id="divider"></div>
                 <div class="flex-between">
                   <div class="timestamp">
-                    ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
+                    ${task?.date !== 'infinite' ? task?.date : 'Daily Quest'}
                   </div>
 
                   <div
                     style="display: flex;justify-content: center;align-items: center; gap: 5px;"
                   >
                     <edit-button
-                      .isCompleted="${task.isCompleted}"
-                      @edit-task="${() => this.handleEdit(task.id)}"
+                      .isCompleted="${task?.isCompleted}"
+                      @edit-task="${() => this.handleEdit(task?.id)}"
                     ></edit-button>
 
                     <delete-button
-                      .isCompleted="${task.isCompleted}"
-                      @delete-task="${() => this.deleteTask(task.id)}"
-                    >
-                    </delete-button>
-                  </div>
-                </div>
-              </div>`
-            )
-          : ''}
-        ${!!this.tasks && this.tasks && this.tasks.length !== 0
-          ? map(
-              this.tasks.filter((task) => task.date !== 'infinite'),
-              (task) => html` <div class="quest-card">
-                <div
-                  class="flex-between"
-                  @click=${() => this.completeTask(task.id)}
-                >
-                  <div
-                    class="task-title"
-                    style="${task.isCompleted
-                      ? ' text-decoration: line-through; color: #b3b3b3;'
-                      : ''}  word-wrap: break-word; word-break: break-all;"
-                  >
-                    ${task.isEditMode && this.createNewTask === false
-                      ? html` <form
-                          @submit=${(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            this.openEditingMode(task.id);
-                            this.cardBeingEditedId = '';
-
-                            const inputElement =
-                              this.shadowRoot.getElementById(
-                                'task-edit-input2'
-                              );
-                            console.log(
-                              'inputElement :>> ',
-                              inputElement.value
-                            );
-                            this.editTask(task.id, inputElement.value);
-                          }}
-                        >
-                          <input
-                            id="task-edit-input2"
-                            style=" border: none;background: transparent;outline: none;box-shadow: none;"
-                            .value=${task.title}
-                            type="text"
-                            minlength="1"
-                            maxlength="${this.maxLengthCharInput}"
-                          />
-                          <input
-                            type="checkbox"
-                            @click=${() => this.toggleInfinite()}
-                            .checked=${task.date === 'infinite' ? true : false}
-                          />
-                          <button
-                            class="submit-button"
-                            type="submit"
-                            style="background:green;z-index:100;"
-                          >
-                            edit
-                          </button>
-                        </form>`
-                      : task.title}
-                  </div>
-                </div>
-
-                <div id="divider"></div>
-                <div class="flex-between">
-                  <div class="timestamp">
-                    ${task.date !== 'infinite' ? task.date : 'Daily Quest'}
-                  </div>
-
-                  <div
-                    style="display: flex;justify-content: center;align-items:center;gap: 5px;"
-                  >
-                    <edit-button
-                      .isCompleted="${task.isCompleted}"
-                      @edit-task="${() => this.handleEdit(task.id)}"
-                    ></edit-button>
-                    <delete-button
-                      .isCompleted="${task.isCompleted}"
-                      @delete-task="${() => this.deleteTask(task.id)}"
+                      .isCompleted="${task?.isCompleted}"
+                      @delete-task="${() => this.deleteTask(task?.id)}"
                     >
                     </delete-button>
                   </div>
