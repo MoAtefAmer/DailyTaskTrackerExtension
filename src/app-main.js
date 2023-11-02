@@ -3,6 +3,7 @@ import { map } from 'lit/directives/map.js';
 import { sharedStyles } from '../styles.js';
 import { checkmark, editIcon, trashIcon } from '../icons.js';
 import './components/delete-button.js';
+import './components/edit-button.js';
 
 class App extends LitElement {
   static styles = [
@@ -76,6 +77,7 @@ class App extends LitElement {
     this.isInfinite = false;
     this.cardBeingEditedId = '';
     this.createNewTask = false;
+    this.maxLengthCharInput = 100; // max length for character input
   }
 
   toggleInfinite() {
@@ -270,6 +272,15 @@ class App extends LitElement {
     this.tasks = tasks;
   }
 
+  handleEdit(taskId) {
+    if (this.createNewTask === false) {
+      if (this.cardBeingEditedId === '' || this.cardBeingEditedId === taskId) {
+        this.cardBeingEditedId = taskId;
+        this.openEditingMode(taskId);
+      }
+    }
+  }
+
   render() {
     // console.log('this.tasks :>> ', this.tasks);
     return html`
@@ -307,6 +318,8 @@ class App extends LitElement {
                       this.task = e.target.value;
                     }}
                     type="text"
+                    minlength="1"
+                    maxlength="${this.maxLengthCharInput}"
                   />
                 </div>
 
@@ -381,6 +394,8 @@ class App extends LitElement {
                               // console.log('As the hours pass :>> ', e.target.value);
                             }}
                             type="text"
+                            minlength="1"
+                            maxlength='${this.maxLengthCharInput}'
                           />
                           <input
                             type="checkbox"
@@ -415,28 +430,16 @@ class App extends LitElement {
                   <div
                     style="display: flex;justify-content: center;align-items: center; gap: 5px;"
                   >
-                    <div
-                      class="change-color-edit-onhover"
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''} "
-                      @click=${() => {
+                    <edit-button
+                      .isCompleted="${task.isCompleted}"
+                      @edit-task="${() => this.handleEdit(task.id)}"
+                    ></edit-button>
 
-                        if (this.createNewTask === false) {
-                          if (
-                            this.cardBeingEditedId === '' ||
-                            this.cardBeingEditedId === task.id
-                          ) {
-                            this.cardBeingEditedId = task.id;
-                            this.openEditingMode(task.id);
-                          }
-                        }
-                      }}
+                    <delete-button
+                      .isCompleted="${task.isCompleted}"
+                      @delete-task="${() => this.deleteTask(task.id)}"
                     >
-                      ${editIcon}
-                    </div>
-
-                    <delete-button @delete-task='${()=>this.deleteTask(task.id)}'> </delete-button>
+                    </delete-button>
                   </div>
                 </div>
               </div>`
@@ -454,7 +457,7 @@ class App extends LitElement {
                     class="task-title"
                     style="${task.isCompleted
                       ? ' text-decoration: line-through; color: #b3b3b3;'
-                      : ''}"
+                      : ''}  word-wrap: break-word; word-break: break-all;"
                   >
                     ${task.isEditMode && this.createNewTask === false
                       ? html` <form
@@ -480,6 +483,8 @@ class App extends LitElement {
                             style=" border: none;background: transparent;outline: none;box-shadow: none;"
                             .value=${task.title}
                             type="text"
+                            minlength="1"
+                            maxlength="${this.maxLengthCharInput}"
                           />
                           <input
                             type="checkbox"
@@ -507,27 +512,15 @@ class App extends LitElement {
                   <div
                     style="display: flex;justify-content: center;align-items:center;gap: 5px;"
                   >
-                    <div
-                      class="change-color-edit-onhover"
-                      style="${task.isCompleted
-                        ? ' text-decoration: line-through; color: #b3b3b3;'
-                        : ''} "
-                      @click=${() => {
-                        if (this.createNewTask === false) {
-                          if (
-                            this.cardBeingEditedId === '' ||
-                            this.cardBeingEditedId === task.id
-                          ) {
-                            this.cardBeingEditedId = task.id;
-                            this.openEditingMode(task.id);
-                          }
-                        }
-                      }}
+                    <edit-button
+                      .isCompleted="${task.isCompleted}"
+                      @edit-task="${() => this.handleEdit(task.id)}"
+                    ></edit-button>
+                    <delete-button
+                      .isCompleted="${task.isCompleted}"
+                      @delete-task="${() => this.deleteTask(task.id)}"
                     >
-                      ${editIcon}
-                    </div>
-                    <delete-button @delete-task='${()=>this.deleteTask(task.id)}'> </delete-button>
-                   
+                    </delete-button>
                   </div>
                 </div>
               </div>`
