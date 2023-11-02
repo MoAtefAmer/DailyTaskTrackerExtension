@@ -146,17 +146,14 @@ class App extends LitElement {
     this.loadTasks();
   }
 
+ 
   async completeTask(id) {
-    const completedTask = this.tasks.filter((task) => task.id === id);
-
-    let newTasks = this.tasks.filter((task) => task.id !== id);
-    if (!!completedTask && completedTask[0]) {
-      completedTask[0].isCompleted = !completedTask[0].isCompleted;
-    }
-
-    newTasks.push(completedTask[0]);
-
-    this.tasks = newTasks.length === 0 ? [] : newTasks;
+    this.tasks.filter((task) => {
+      if (task.id === id) {
+        task.isCompleted = !task.isCompleted;
+        return;
+      }
+    });
     this.setTasks(this.tasks);
   }
 
@@ -261,25 +258,36 @@ class App extends LitElement {
     );
   }
 
-  async loadTasks() {
-    const { tasks } = await chrome.storage.sync.get('tasks');
-
+  sortTasks(tasks) {
     // Sort the array by infinte then by date
     console.log('tasks :>> ', tasks);
 
     let infiniteTasks = [];
     let datedTasks = [];
+    let completedTasks = [];
 
     tasks.filter((task) => {
-      if (task?.date === 'infinite') {
+      if (task?.date === 'infinite' && task?.isCompleted === false) {
         infiniteTasks.push(task);
-      } else {
-        datedTasks.push(task);
+        return true;
       }
+
+      if (task?.date !== 'infinite' && task?.isCompleted === false) {
+        datedTasks.push(task);
+        return true;
+      }
+
+      completedTasks.push(task);
     });
-    let combinedTasks = [...infiniteTasks, ...datedTasks];
-    this.tasks = combinedTasks;
+    let combinedTasks = [...infiniteTasks, ...datedTasks, ...completedTasks];
     console.log('combinedTasks :>> ', combinedTasks);
+    return combinedTasks;
+  }
+
+  async loadTasks() {
+    const { tasks } = await chrome.storage.sync.get('tasks');
+
+    this.tasks = this.sortTasks(tasks);
   }
 
   handleEdit(taskId) {
