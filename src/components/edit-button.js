@@ -1,18 +1,17 @@
 import { LitElement, html, css } from 'lit';
-import { trashIcon } from '../../icons.js';
-
-export class DeleteButton extends LitElement {
+import { editIcon } from '../../icons.js';
+export class EditButton extends LitElement {
   static styles = [
     css`
       .change-color-onhover:hover {
-        color: red;
+        color: blue;
       }
     `,
   ];
 
-  deleteTask() {
+  editTask() {
     this.dispatchEvent(
-      new CustomEvent('delete-task', { bubbles: true, composed: true })
+      new CustomEvent('edit-task', { bubbles: true, composed: true })
     );
   }
 
@@ -25,13 +24,14 @@ export class DeleteButton extends LitElement {
   render() {
     return html` <div
       class="change-color-onhover"
-      @click=${this.deleteTask}
+      @click=${this.editTask}
       style="${this.isCompleted
         ? ' text-decoration: line-through; color: #b3b3b3;'
         : ''}"
     >
-      ${trashIcon}
+      ${editIcon}
     </div>`;
   }
 }
-customElements.define('delete-button', DeleteButton);
+
+customElements.define('edit-button', EditButton);

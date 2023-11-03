@@ -1,5 +1,6 @@
 secrets/
 /node_modules
+*.zip
 # Logs
 logs
 *.log
