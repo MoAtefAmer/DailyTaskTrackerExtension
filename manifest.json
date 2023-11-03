@@ -17,7 +17,7 @@
       "48": "logo.png",
       "128": "logo.png"
     },
-    "permissions": ["activeTab", "scripting","storage"],
+    "permissions": ["storage"],
   
     "content_scripts": [{
       "matches": ["<all_urls>"],
