@@ -10,7 +10,9 @@ export class EditButton extends LitElement {
   ];
 
   editTask() {
-    this.dispatchEvent(new CustomEvent('edit-task'));
+    this.dispatchEvent(
+      new CustomEvent('edit-task', { bubbles: true, composed: true })
+    );
   }
 
   static get properties() {

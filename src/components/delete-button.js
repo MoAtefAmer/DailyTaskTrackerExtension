@@ -11,15 +11,16 @@ export class DeleteButton extends LitElement {
   ];
 
   deleteTask() {
-    this.dispatchEvent(new CustomEvent('delete-task'));
+    this.dispatchEvent(
+      new CustomEvent('delete-task', { bubbles: true, composed: true })
+    );
   }
 
-  static get properties(){
+  static get properties() {
     return {
-        isCompleted: { type: Boolean },
-    }
+      isCompleted: { type: Boolean },
+    };
   }
-
 
   render() {
     return html` <div
