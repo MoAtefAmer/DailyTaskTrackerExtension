@@ -4,6 +4,8 @@ import { SignalWatcher } from '@lit-labs/preact-signals';
 import './delete-button.js';
 import './edit-button.js';
 import './complete-task-button.js';
+
+import './link-button.js';
 import { cardBeingEditedId } from '../state/signals.js';
 import { setCardBeingEditedId } from '../state/setters.js';
 
@@ -19,30 +21,24 @@ export class TaskCard extends SignalWatcher(LitElement) {
         color: white;
       }
 
-      .color-animation{
-        color:red;
+      .color-animation {
+        color: red;
         transition: color 0.5s;
-
       }
     `,
   ];
 
+  // State variables
   static get properties() {
     return {
       task: { type: Object },
       title: { type: String },
       date: { type: String },
+      link: { type: String },
       isInfinite: { type: Boolean },
       maxLengthCharInput: { type: Number },
       createNewTask: { type: Boolean },
     };
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.title = this.task?.title;
-    this.date = this.task?.date;
-    this.isInfinite = this.task?.date === 'infinite' ? true : false;
   }
 
   constructor() {
@@ -50,9 +46,30 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.task = {};
     this.title = '';
     this.date = '';
+    this.link = '';
     this.isInfinite = false;
   }
 
+  // Lifecycle functions
+  connectedCallback() {
+    super.connectedCallback();
+    this.title = this.task?.title;
+    this.date = this.task?.date;
+    this.isInfinite = this.task?.date === 'infinite' ? true : false;
+    this.setLink();
+  }
+
+  setLink() {
+    this.link = this.extractUrl(this.task?.title);
+  }
+
+  extractUrl(text) {
+    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
+    const match = text.match(urlRegex);
+    return match ? match[0] : '';
+  }
+
+  // Events
   openEditingMode() {
     this.dispatchEvent(
       new CustomEvent('open-editing-mode', { bubbles: true, composed: true })
@@ -68,6 +85,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.dispatchEvent(
       new CustomEvent('edit-task-submit', { detail: { title, isInfinite } })
     );
+    this.setLink();
   }
 
   deleteTask() {
@@ -75,9 +93,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
       new CustomEvent('delete-task', { bubbles: true, composed: true })
     );
   }
-  toggleInfinite() {
-    this.isInfinite = !this.isInfinite;
-  }
+
   completeTask() {
     this.dispatchEvent(new CustomEvent('complete-task'), {
       bubbles: true,
@@ -85,12 +101,30 @@ export class TaskCard extends SignalWatcher(LitElement) {
     });
   }
 
+  // Functions
+  toggleInfinite() {
+    this.isInfinite = !this.isInfinite;
+  }
+
   isEditingModeOpen() {
     return cardBeingEditedId.value === this.task?.id;
   }
 
+  removeUrl(text) {
+    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
+
+    const result = text.replace(urlRegex, '');
+    return result;
+  }
+
+  handleChange(event) {
+    this.title = event.target.value;
+    event.target.style.height = 'auto';
+    event.target.style.height = event.target.scrollHeight + 'px';
+  }
+
   render() {
-    return html`<div class="quest-card" >
+    return html`<div class="quest-card" style="max-width:300px;">
       <div class="flex-between">
         <div
           class="task-title"
@@ -100,34 +134,54 @@ export class TaskCard extends SignalWatcher(LitElement) {
         >
           ${this.isEditingModeOpen()
             ? html`
-                <input
+                <textarea
                   id="task-edit-input"
-                  style=" border: none;background: transparent;outline: none;box-shadow: none;"
+                  style=" border: none;background: transparent;outline: none;box-shadow: none; max-width:250px; resize: none"
                   .value=${this.task.title}
                   @input=${(e) => {
-                    this.title = e.target.value;
+                    this.handleChange(e);
+                    // this.title = e.target.value;
+                    // Remove the URL from the input box after processing it
+                    // this.title = this.extractUrl(this.title);
                   }}
                   type="text"
                   minlength="1"
                   maxlength="${this.maxLengthCharInput}"
-                />
-                <input
-                  type="checkbox"
-                  @click=${this.toggleInfinite}
-                  .checked=${this.isInfinite}
-                />
-                <button
-                  @click=${(e) => {
-                    this.editTaskSubmit(this.title, this.isInfinite);
-                    setCardBeingEditedId('');
-                  }}
-                  class="edit-button"
-                  style="background:green;;z-index:100;"
                 >
-                  edit
-                </button>
+                </textarea>
+       
+                <div>
+                <input
+                    type="checkbox"
+                    @click=${this.toggleInfinite}
+                    .checked=${this.isInfinite}
+                  />
+                  <button
+                    @click=${(e) => {
+                      this.editTaskSubmit(this.title, this.isInfinite);
+                      // this.title = this.removeUrl(this.title);
+
+                      setCardBeingEditedId('');
+                    }}
+                    class="edit-button"
+                    style="background:green;z-index:100;"
+                  >
+                    edit
+                  </button>
+                </div>
               `
-            : this.task?.title}
+            : html`<span
+                  style="word-break: break-all; overflow-wrap: break-word; max-width:250px;"
+                  >${this.removeUrl(this.task?.title)}</span
+                >
+                ${this.link
+                  ? html`<div style="padding-left:5px;">
+                      <link-button
+                        .isCompleted="${this.task?.isCompleted}"
+                        link="${this.link}"
+                      ></link-button>
+                    </div>`
+                  : ''} `}
         </div>
 
         ${!this.isEditingModeOpen()

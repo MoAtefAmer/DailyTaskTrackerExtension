@@ -50,11 +50,14 @@ class App extends SignalWatcher(LitElement) {
     };
   }
 
-  getNextDayDate() {
-    const currentDate = new Date();
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1); // Set the date to tomorrow
-    return nextDay.toLocaleDateString('en-US');
+  constructor() {
+    super();
+    this.task = '';
+    this.tasks = [];
+    this.isInfinite = false;
+    this.cardBeingEditedId = '';
+    this.createNewTask = false;
+    this.maxLengthCharInput = 200; // max length for character input
   }
 
   async connectedCallback() {
@@ -63,21 +66,30 @@ class App extends SignalWatcher(LitElement) {
     this.calculateDailyQuests();
   }
 
-  constructor() {
-    super();
-    this.task = '';
-    this.tasks = [];
-    this.isInfinite = false;
-    this.cardBeingEditedId = '';
-    this.createNewTask = false;
-    this.maxLengthCharInput = 100; // max length for character input
+  updated() {
+    this.shadowRoot.getElementById('task-edit-input')?.focus();
+    this.shadowRoot.getElementById('task-input')?.focus();
   }
 
-  toggleInfinite() {
-    this.isInfinite = !this.isInfinite;
+  async loadTasks() {
+    // Always use this for global reload of tasks
+    const { tasks } = await chrome.storage.sync.get('tasks');
+    this.tasks = this.sortTasks(tasks);
   }
 
-  editInfinite() {}
+  sortTasks(tasks) {
+    tasks.sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) {
+        return a.isCompleted ? 1 : -1;
+      }
+      if (a.date !== b.date) {
+        return a.date === 'infinite' ? -1 : 1;
+      }
+      return 0;
+    });
+
+    return tasks;
+  }
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
@@ -116,8 +128,36 @@ class App extends SignalWatcher(LitElement) {
     }
   }
 
+  getNextDayDate() {
+    const currentDate = new Date();
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(currentDate.getDate() + 1); // Set the date to tomorrow
+    return nextDay.toLocaleDateString('en-US');
+  }
+
+  toggleInfinite() {
+    this.isInfinite = !this.isInfinite;
+  }
+
+  generateId() {
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
+  }
+
   async deleteAllTasks() {
     await chrome.storage.sync.set({ tasks: [] });
+    this.loadTasks();
+  }
+
+  async setTasks(tasks) {
+    if (tasks !== undefined || null || [] || tasks.length !== 0) {
+      await chrome.storage.sync.set({ tasks });
+    } else {
+      await chrome.storage.sync.set({ tasks: [] });
+    }
+
     this.loadTasks();
   }
 
@@ -131,30 +171,6 @@ class App extends SignalWatcher(LitElement) {
     // this.tasks = newTasks.length === 0 ? [] : newTasks;
   }
 
-  sortTasks(tasks) {
-    tasks.sort((a, b) => {
-      if (a.isCompleted !== b.isCompleted) {
-        return a.isCompleted ? 1 : -1;
-      }
-      if (a.date !== b.date) {
-        return a.date === 'infinite' ? -1 : 1;
-      }
-      return 0;
-    });
-
-    return tasks;
-  }
-
-  async setTasks(tasks) {
-    if (tasks !== undefined || null || [] || tasks.length !== 0) {
-      await chrome.storage.sync.set({ tasks });
-    } else {
-      await chrome.storage.sync.set({ tasks: [] });
-    }
-
-    this.loadTasks();
-  }
-
   async completeTask(id) {
     this.tasks.forEach((task) => {
       if (task.id === id) {
@@ -163,7 +179,6 @@ class App extends SignalWatcher(LitElement) {
       }
     });
 
-    
     this.setTasks(this.tasks);
   }
 
@@ -183,7 +198,6 @@ class App extends SignalWatcher(LitElement) {
       this.setTasks(this.tasks);
     }
   }
-  // Weird bug where sometimes the daily quest isnt checked off
 
   async saveTask2() {
     const { tasks } = await chrome.storage.sync.get('tasks');
@@ -229,29 +243,17 @@ class App extends SignalWatcher(LitElement) {
     this.loadTasks();
   }
 
-  updated() {
-    this.shadowRoot.getElementById('task-edit-input')?.focus();
-    this.shadowRoot.getElementById('task-input')?.focus();
-  }
-
-  generateId() {
-    return (
-      Math.random().toString(36).substring(2, 15) +
-      Math.random().toString(36).substring(2, 15)
-    );
-  }
-
-  async loadTasks() {
-    // Always use this for global reload of tasks
-    const { tasks } = await chrome.storage.sync.get('tasks');
-    this.tasks = this.sortTasks(tasks);
-  }
-
   handleEdit(taskId) {
     // console.log('taskId :>> ', taskId);
     if (this.createNewTask === false) {
       this.cardBeingEditedId = taskId;
     }
+  }
+
+  handleChange(event) {
+    this.task = event.target.value;
+    event.target.style.height = 'auto';
+    event.target.style.height = event.target.scrollHeight + 'px';
   }
 
   render() {
@@ -281,16 +283,17 @@ class App extends SignalWatcher(LitElement) {
                 <div
                   style="display:flex;align-items:center;justify-content:center;"
                 >
-                  <input
+                  <textarea
+                  style="resize:none;"
                     id="task-input"
                     .value=${this.task}
                     @input=${(e) => {
-                      this.task = e.target.value;
+                     this.handleChange(e)
                     }}
                     type="text"
                     minlength="1"
                     maxlength="${this.maxLengthCharInput}"
-                  />
+                  > </textarea>
                 </div>
 
                 <div style="display:flex;align-items:center;margin:1rem;">
