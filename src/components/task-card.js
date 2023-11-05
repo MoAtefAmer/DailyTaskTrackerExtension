@@ -112,12 +112,16 @@ export class TaskCard extends SignalWatcher(LitElement) {
 
   removeUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
-    console.log('text :>> ', text);
+
     const result = text.replace(urlRegex, '');
-    console.log('result :>> ', result);
     return result;
   }
 
+  handleChange(event) {
+    this.title = event.target.value;
+    event.target.style.height = 'auto';
+    event.target.style.height = event.target.scrollHeight + 'px';
+  }
 
   render() {
     return html`<div class="quest-card" style="max-width:300px;">
@@ -130,45 +134,53 @@ export class TaskCard extends SignalWatcher(LitElement) {
         >
           ${this.isEditingModeOpen()
             ? html`
-                <input
+                <textarea
                   id="task-edit-input"
-                  style=" border: none;background: transparent;outline: none;box-shadow: none;"
+                  style=" border: none;background: transparent;outline: none;box-shadow: none; max-width:250px; resize: none"
                   .value=${this.task.title}
                   @input=${(e) => {
-                    this.title = e.target.value;
+                    this.handleChange(e);
+                    // this.title = e.target.value;
                     // Remove the URL from the input box after processing it
                     // this.title = this.extractUrl(this.title);
                   }}
                   type="text"
                   minlength="1"
                   maxlength="${this.maxLengthCharInput}"
-                />
-
-                <input
-                  type="checkbox"
-                  @click=${this.toggleInfinite}
-                  .checked=${this.isInfinite}
-                />
-                <button
-                  @click=${(e) => {
-                    console.log('this.title :>> ', this.title);
-                    this.editTaskSubmit(this.title, this.isInfinite);
-                    // this.title = this.removeUrl(this.title);
-
-                    setCardBeingEditedId('');
-                  }}
-                  class="edit-button"
-                  style="background:green;;z-index:100;"
                 >
-                  edit
-                </button>
+                </textarea>
+       
+                <div>
+                <input
+                    type="checkbox"
+                    @click=${this.toggleInfinite}
+                    .checked=${this.isInfinite}
+                  />
+                  <button
+                    @click=${(e) => {
+                      this.editTaskSubmit(this.title, this.isInfinite);
+                      // this.title = this.removeUrl(this.title);
+
+                      setCardBeingEditedId('');
+                    }}
+                    class="edit-button"
+                    style="background:green;z-index:100;"
+                  >
+                    edit
+                  </button>
+                </div>
               `
             : html`<span
                   style="word-break: break-all; overflow-wrap: break-word; max-width:250px;"
                   >${this.removeUrl(this.task?.title)}</span
                 >
                 ${this.link
-                  ? html`<div style="padding-left:5px;"><link-button .isCompleted='${this.task?.isCompleted}' link="${this.link}"></link-button></div>`
+                  ? html`<div style="padding-left:5px;">
+                      <link-button
+                        .isCompleted="${this.task?.isCompleted}"
+                        link="${this.link}"
+                      ></link-button>
+                    </div>`
                   : ''} `}
         </div>
 

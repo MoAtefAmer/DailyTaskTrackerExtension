@@ -57,7 +57,7 @@ class App extends SignalWatcher(LitElement) {
     this.isInfinite = false;
     this.cardBeingEditedId = '';
     this.createNewTask = false;
-    this.maxLengthCharInput = 100; // max length for character input
+    this.maxLengthCharInput = 200; // max length for character input
   }
 
   async connectedCallback() {
@@ -250,6 +250,12 @@ class App extends SignalWatcher(LitElement) {
     }
   }
 
+  handleChange(event) {
+    this.task = event.target.value;
+    event.target.style.height = 'auto';
+    event.target.style.height = event.target.scrollHeight + 'px';
+  }
+
   render() {
     return html`
       <section class="main">
@@ -277,16 +283,17 @@ class App extends SignalWatcher(LitElement) {
                 <div
                   style="display:flex;align-items:center;justify-content:center;"
                 >
-                  <input
+                  <textarea
+                  style="resize:none;"
                     id="task-input"
                     .value=${this.task}
                     @input=${(e) => {
-                      this.task = e.target.value;
+                     this.handleChange(e)
                     }}
                     type="text"
                     minlength="1"
                     maxlength="${this.maxLengthCharInput}"
-                  />
+                  > </textarea>
                 </div>
 
                 <div style="display:flex;align-items:center;margin:1rem;">
