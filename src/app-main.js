@@ -251,8 +251,6 @@ class App extends LitElement {
   }
 
   render() {
-    console.log('state.get() :>> ', state.get('CardBeingEditedId'));
-    console.log('cardBeingEditedId :>> ', this.cardBeingEditedId);
     return html`
       <section class="main">
         ${this.createNewTask
