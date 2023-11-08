@@ -16,3 +16,10 @@ VERSION=$(shell cat manifest.json | jq -r '.version')
 
 zip:
 	zip -r d_quest_$(VERSION).zip dist/* logo.png
+
+
+
+
+build:
+	npx esbuild src/app-main.js --bundle --format=esm --outfile=dist/app-main.js
+	zip -r d_quest_$(VERSION).zip dist/* logo.png
