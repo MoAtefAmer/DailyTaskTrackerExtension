@@ -1,11 +1,12 @@
 import { html, css, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { sharedStyles } from '../styles.js';
-import { SignalWatcher, signal } from '@lit-labs/preact-signals';
+import { state } from './state/state.js';
+
 
 import './components/task-card.js';
 
-class App extends SignalWatcher(LitElement) {
+class App extends LitElement {
   static styles = [
     sharedStyles,
     css`
@@ -100,12 +101,6 @@ class App extends SignalWatcher(LitElement) {
       storedTime = await chrome.storage.local.get('currentDate');
     }
 
-    // chrome.storage.local.set({ currentDate: "7/26/2023" });
-    // console.log('storedDateString :>> ', storedTime.currentDate);
-    // console.log(
-    //   'new Date().toLocaleDateString :>> ',
-    //   new Date().toLocaleDateString('en-US')
-    // );
     const todaysDate = new Date().toLocaleDateString('en-US');
 
     if (storedDateString <= todaysDate) {
@@ -153,8 +148,7 @@ class App extends SignalWatcher(LitElement) {
 
   async setTasks(tasks) {
 
-    // const tasks = this.sortTasks([...tasksList]);
-    // console.log('tasks :>> ', tasks);
+
     if (tasks !== undefined || null || [] || tasks.length !== 0) {
       await chrome.storage.sync.set({ tasks });
     } else {
@@ -165,10 +159,8 @@ class App extends SignalWatcher(LitElement) {
   }
 
   async deleteTask(id) {
-    // const taskToBeDeleted = this.tasks.filter((task) => task.id === id);
-    // console.log('id :>> ', id);
+   
     let newTasks = this.tasks.filter((task) => task.id !== id);
-    // console.log('deleteTask newTasks :>> ', newTasks);
 
     this.setTasks(newTasks);
     // this.tasks = newTasks.length === 0 ? [] : newTasks;
@@ -250,12 +242,7 @@ class App extends SignalWatcher(LitElement) {
     this.loadTasks();
   }
 
-  handleEdit(taskId) {
-    // console.log('taskId :>> ', taskId);
-    if (this.createNewTask === false) {
-      this.cardBeingEditedId = taskId;
-    }
-  }
+
 
   handleChange(event) {
     this.task = event.target.value;

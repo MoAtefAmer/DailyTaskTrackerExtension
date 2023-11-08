@@ -1,15 +1,12 @@
 import { LitElement, html, css } from 'lit';
 import { sharedStyles } from '../../styles';
-import { SignalWatcher } from '@lit-labs/preact-signals';
 import './delete-button.js';
 import './edit-button.js';
 import './complete-task-button.js';
-
 import './link-button.js';
-import { cardBeingEditedId } from '../state/signals.js';
-import { setCardBeingEditedId } from '../state/setters.js';
+import { state } from '../state/state.js';
 
-export class TaskCard extends SignalWatcher(LitElement) {
+export class TaskCard extends LitElement {
   static styles = [
     sharedStyles,
     css`
@@ -38,6 +35,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
       isInfinite: { type: Boolean },
       maxLengthCharInput: { type: Number },
       createNewTask: { type: Boolean },
+      isEditingModeOpen: { type: Boolean },
     };
   }
 
@@ -48,6 +46,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.date = '';
     this.link = '';
     this.isInfinite = false;
+    this.isEditingModeOpen = false;
   }
 
   // Lifecycle functions
@@ -57,7 +56,11 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.date = this.task?.date;
     this.isInfinite = this.task?.date === 'infinite' ? true : false;
     this.setLink();
+    this.stateListener();
+
   }
+
+
 
   isThereALink() {
       return this.extractUrl(this.task?.title);
@@ -120,9 +123,19 @@ export class TaskCard extends SignalWatcher(LitElement) {
     return task.date === 'infinite' ? true : false;
   }
 
-  isEditingModeOpen() {
-    return cardBeingEditedId.value === this.task?.id;
+  stateListener(){
+    state.addEventListener('CardBeingEditedId', (e) => {
+      if(e.detail.value === this.task?.id){
+        this.isEditingModeOpen = true;
+      }else{
+        this.isEditingModeOpen = false
+      }
+
+     
+  })
   }
+
+
 
   removeUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
@@ -140,7 +153,6 @@ export class TaskCard extends SignalWatcher(LitElement) {
   }
 
   render() {
-    // console.log('this.task :>> ', this.task);
     return html`<div class="quest-card" style="max-width:300px;">
       <div class="flex-between">
         <div
@@ -149,7 +161,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
             ? ' text-decoration: line-through; color: #b3b3b3;'
             : ''}"
         >
-          ${this.isEditingModeOpen()
+          ${this.isEditingModeOpen
             ? html`
                 <textarea
                   id="task-edit-input"
@@ -157,9 +169,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   .value=${this.task.title}
                   @input=${(e) => {
                     this.handleChange(e);
-                    // this.title = e.target.value;
-                    // Remove the URL from the input box after processing it
-                    // this.title = this.extractUrl(this.title);
+                  
                   }}
                   type="text"
                   minlength="1"
@@ -176,9 +186,8 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   <button
                     @click=${(e) => {
                       this.editTaskSubmit(this.title, this.isInfinite);
-                      // this.title = this.removeUrl(this.title);
-
-                      setCardBeingEditedId('');
+                
+                      state.set('CardBeingEditedId','')
                     }}
                     class="edit-button"
                     style="background:green;z-index:100;"
@@ -201,7 +210,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   : ''} `}
         </div>
 
-        ${!this.isEditingModeOpen()
+        ${!this.isEditingModeOpen
           ? html` <complete-task-button
               .isCompleted="${this.task?.isCompleted}"
               @toggle-complete="${this.completeTask}"
@@ -222,10 +231,12 @@ export class TaskCard extends SignalWatcher(LitElement) {
             .isCompleted="${this.task?.isCompleted}"
             @click=${() => {
               this.title = ''; // dont know if this is useful or not
-              if (this.isEditingModeOpen()) {
-                setCardBeingEditedId('');
+              if (this.isEditingModeOpen) {
+         
+                state.set('CardBeingEditedId','')
               } else {
-                setCardBeingEditedId(this.task?.id);
+           
+                state.set('CardBeingEditedId',this.task?.id)
               }
             }}
           ></edit-button>

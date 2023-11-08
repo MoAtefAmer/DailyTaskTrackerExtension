@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@lit-labs/preact-signals": "^1.0.1",
     "esbuild": "^0.18.13",
     "lit": "^3.0.2"
   }
