@@ -59,12 +59,16 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.setLink();
   }
 
+  isThereALink() {
+      return this.extractUrl(this.task?.title);
+  }  
+
   setLink() {
     this.link = this.extractUrl(this.task?.title);
   }
 
   extractUrl(text) {
-    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g
+    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
     const fileRegex = /\s?(file:\/\/\/[^\s]+)\s?/g;
     let match = text.match(urlRegex);
 
@@ -112,6 +116,10 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.isInfinite = !this.isInfinite;
   }
 
+  isThisInfinite(task) {
+    return task.date === 'infinite' ? true : false;
+  }
+
   isEditingModeOpen() {
     return cardBeingEditedId.value === this.task?.id;
   }
@@ -119,7 +127,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
   removeUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
     const fileRegex = /\s?(file:\/\/\/[^\s]+)\s?/g;
-    let  result = text.replace(urlRegex, '');
+    let result = text.replace(urlRegex, '');
     result = result.replace(fileRegex, '');
 
     return result;
@@ -132,6 +140,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
   }
 
   render() {
+    // console.log('this.task :>> ', this.task);
     return html`<div class="quest-card" style="max-width:300px;">
       <div class="flex-between">
         <div
@@ -157,12 +166,12 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   maxlength="${this.maxLengthCharInput}"
                 >
                 </textarea>
-       
+
                 <div>
-                <input
+                  <input
                     type="checkbox"
                     @click=${this.toggleInfinite}
-                    .checked=${this.isInfinite}
+                    .checked=${this.isThisInfinite(this.task)}
                   />
                   <button
                     @click=${(e) => {
@@ -182,7 +191,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   style="word-break: break-all; overflow-wrap: break-word; max-width:250px;"
                   >${this.removeUrl(this.task?.title)}</span
                 >
-                ${this.link
+                ${this.isThereALink()
                   ? html`<div style="padding-left:5px;">
                       <link-button
                         .isCompleted="${this.task?.isCompleted}"
