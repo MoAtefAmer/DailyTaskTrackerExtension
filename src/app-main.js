@@ -152,13 +152,16 @@ class App extends SignalWatcher(LitElement) {
   }
 
   async setTasks(tasks) {
+
+    // const tasks = this.sortTasks([...tasksList]);
+    console.log('tasks :>> ', tasks);
     if (tasks !== undefined || null || [] || tasks.length !== 0) {
       await chrome.storage.sync.set({ tasks });
     } else {
       await chrome.storage.sync.set({ tasks: [] });
     }
 
-    this.loadTasks();
+    await this.loadTasks();
   }
 
   async deleteTask(id) {
@@ -175,10 +178,12 @@ class App extends SignalWatcher(LitElement) {
     this.tasks.forEach((task) => {
       if (task.id === id) {
         task.isCompleted = !task.isCompleted;
-        return;
+        // return;
       }
     });
 
+
+    // this.setTasks(this.sortTasks(this.tasks));
     this.setTasks(this.tasks);
   }
 
@@ -195,7 +200,9 @@ class App extends SignalWatcher(LitElement) {
           if (title !== '') task.title = title;
         }
       });
-      this.setTasks(this.tasks);
+
+
+      this.setTasks((this.tasks));
     }
   }
 
@@ -326,7 +333,7 @@ class App extends SignalWatcher(LitElement) {
             >
               Create Task
             </button>`}
-        ${!!this.tasks && this.tasks && this.tasks.length !== 0
+        ${!!this.tasks  && this.tasks.length !== 0
           ? repeat(
               this.tasks,
               (task) =>
