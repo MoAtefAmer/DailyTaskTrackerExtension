@@ -59,6 +59,10 @@ export class TaskCard extends SignalWatcher(LitElement) {
     this.setLink();
   }
 
+  isThereALink() {
+      return this.extractUrl(this.task?.title);
+  }  
+
   setLink() {
     this.link = this.extractUrl(this.task?.title);
   }
@@ -136,7 +140,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
   }
 
   render() {
-    console.log('this.task :>> ', this.task);
+    // console.log('this.task :>> ', this.task);
     return html`<div class="quest-card" style="max-width:300px;">
       <div class="flex-between">
         <div
@@ -187,7 +191,7 @@ export class TaskCard extends SignalWatcher(LitElement) {
                   style="word-break: break-all; overflow-wrap: break-word; max-width:250px;"
                   >${this.removeUrl(this.task?.title)}</span
                 >
-                ${this.link
+                ${this.isThereALink()
                   ? html`<div style="padding-left:5px;">
                       <link-button
                         .isCompleted="${this.task?.isCompleted}"

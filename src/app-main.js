@@ -154,7 +154,7 @@ class App extends SignalWatcher(LitElement) {
   async setTasks(tasks) {
 
     // const tasks = this.sortTasks([...tasksList]);
-    console.log('tasks :>> ', tasks);
+    // console.log('tasks :>> ', tasks);
     if (tasks !== undefined || null || [] || tasks.length !== 0) {
       await chrome.storage.sync.set({ tasks });
     } else {
