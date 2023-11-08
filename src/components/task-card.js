@@ -64,8 +64,14 @@ export class TaskCard extends SignalWatcher(LitElement) {
   }
 
   extractUrl(text) {
-    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
-    const match = text.match(urlRegex);
+    const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g
+    const fileRegex = /\s?(file:\/\/\/[^\s]+)\s?/g;
+    let match = text.match(urlRegex);
+
+    if (!match) {
+      match = text.match(fileRegex);
+    }
+
     return match ? match[0] : '';
   }
 
@@ -112,8 +118,10 @@ export class TaskCard extends SignalWatcher(LitElement) {
 
   removeUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
+    const fileRegex = /\s?(file:\/\/\/[^\s]+)\s?/g;
+    let  result = text.replace(urlRegex, '');
+    result = result.replace(fileRegex, '');
 
-    const result = text.replace(urlRegex, '');
     return result;
   }
 
