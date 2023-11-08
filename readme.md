@@ -6,6 +6,11 @@ This is a simple todo chrome extension to help you setup your daily tasks which 
 
 This is a lightweight app with no backend.
 
+## Features
+- Daily quests always stay and get reset at the end of the day if marked as completed
+- Text input detects links pasted and shows a clickable icon after submiting input
+- Non-daily quests get deleted at the end of the day if marked as completed
+
 ## How to load
 1- In your chrome browser, click on the top right 3 dots then click Extensions > Manage Extensions
 
