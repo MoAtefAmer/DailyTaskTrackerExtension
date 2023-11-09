@@ -3,7 +3,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { sharedStyles } from '../styles.js';
 import { state } from './state/state.js';
 
-
 import './components/task-card.js';
 
 class App extends LitElement {
@@ -92,6 +91,11 @@ class App extends LitElement {
     return tasks;
   }
 
+   parseDate (str)  {
+    const [month, day, year] = str.split('/');
+    return new Date(year, month - 1, day);
+  };
+
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
     const storedDateString = storedTime.currentDate;
@@ -99,11 +103,14 @@ class App extends LitElement {
     if (storedTime.currentDate === undefined) {
       chrome.storage.local.set({ currentDate: this.getNextDayDate() });
       storedTime = await chrome.storage.local.get('currentDate');
+     
+
     }
 
     const todaysDate = new Date().toLocaleDateString('en-US');
 
-    if (storedDateString <= todaysDate) {
+    if (this.parseDate(storedDateString) <= this.parseDate(todaysDate)) {
+  
       if (this.tasks.length !== 0) {
         this.tasks = this.tasks.filter((task) => {
           if (task.isCompleted) {
@@ -117,8 +124,8 @@ class App extends LitElement {
           return true; // keep in the array
         });
         this.setTasks(this.tasks);
-
         chrome.storage.local.set({ currentDate: this.getNextDayDate() });
+      
       }
     }
   }
@@ -147,8 +154,6 @@ class App extends LitElement {
   }
 
   async setTasks(tasks) {
-
-
     if (tasks !== undefined || null || [] || tasks.length !== 0) {
       await chrome.storage.sync.set({ tasks });
     } else {
@@ -159,7 +164,6 @@ class App extends LitElement {
   }
 
   async deleteTask(id) {
-   
     let newTasks = this.tasks.filter((task) => task.id !== id);
 
     this.setTasks(newTasks);
@@ -173,7 +177,6 @@ class App extends LitElement {
         // return;
       }
     });
-
 
     // this.setTasks(this.sortTasks(this.tasks));
     this.setTasks(this.tasks);
@@ -193,8 +196,7 @@ class App extends LitElement {
         }
       });
 
-
-      this.setTasks((this.tasks));
+      this.setTasks(this.tasks);
     }
   }
 
@@ -242,8 +244,6 @@ class App extends LitElement {
     this.loadTasks();
   }
 
-
-
   handleChange(event) {
     this.task = event.target.value;
     event.target.style.height = 'auto';
@@ -278,16 +278,17 @@ class App extends LitElement {
                   style="display:flex;align-items:center;justify-content:center;"
                 >
                   <textarea
-                  style="resize:none;"
+                    style="resize:none;"
                     id="task-input"
                     .value=${this.task}
                     @input=${(e) => {
-                     this.handleChange(e)
+                      this.handleChange(e);
                     }}
                     type="text"
                     minlength="1"
                     maxlength="${this.maxLengthCharInput}"
-                  > </textarea>
+                  >
+                  </textarea>
                 </div>
 
                 <div style="display:flex;align-items:center;margin:1rem;">
@@ -320,7 +321,7 @@ class App extends LitElement {
             >
               Create Task
             </button>`}
-        ${!!this.tasks  && this.tasks.length !== 0
+        ${!!this.tasks && this.tasks.length !== 0
           ? repeat(
               this.tasks,
               (task) =>
