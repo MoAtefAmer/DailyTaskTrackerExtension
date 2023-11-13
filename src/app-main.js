@@ -300,6 +300,13 @@ class App extends LitElement {
                     @input=${(e) => {
                       this.handleChange(e);
                     }}
+                    @keydown=${(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault(); // prevent a new line from being added
+                        this.saveTask2();
+                        this.createNewTask = false;
+                      }
+                    }}
                     type="text"
                     minlength="1"
                     maxlength="${this.maxLengthCharInput}"
@@ -340,12 +347,11 @@ class App extends LitElement {
               </button>
               ${this.tasks.length === 0
                 ? html`<div class="splash-image">
-                    <img src="src/assets/logo.png" alt="" />
-                  </div>
-                  <h3 style="text-align:center;">
-                    You have no quests, create one!</h3>
-                  
-                  `
+                      <img src="src/assets/logo.png" alt="" />
+                    </div>
+                    <h3 style="text-align:center;">
+                      You have no quests, create one!
+                    </h3> `
                 : ''}
             `}
         ${!!this.tasks && this.tasks.length !== 0
