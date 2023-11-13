@@ -58,10 +58,9 @@ export class TaskCard extends LitElement {
   }
 
   isThereALink(task) {
-    let taskTitle = task.title
+    let taskTitle = task.title;
     return this.extractUrl(taskTitle);
   }
-
 
   extractUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
@@ -157,6 +156,13 @@ export class TaskCard extends LitElement {
                   .value=${this.task.title}
                   @input=${(e) => {
                     this.handleChange(e);
+                  }}
+                  @keydown=${(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault(); // prevent a new line from being added
+                      this.editTaskSubmit(this.title, this.isInfinite);
+                      state.set('CardBeingEditedId', '');
+                    }
                   }}
                   type="text"
                   minlength="1"
