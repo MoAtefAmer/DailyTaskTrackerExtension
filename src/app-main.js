@@ -14,6 +14,21 @@ class App extends LitElement {
         padding: 0;
         margin: 0;
       }
+      .splash-image {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+        width: 200px;
+        height: 200px;
+      }
+
+      .splash-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15px;
+      }
       #task-input {
         border: none;
         border-radius: 5px;
@@ -315,13 +330,24 @@ class App extends LitElement {
                   </button>
                 </div>
               </form>`
-          : html`<button
-              class="submit-button"
-              style="cursor:pointer;"
-              @click=${() => (this.createNewTask = true)}
-            >
-              Create Task
-            </button>`}
+          : html`
+              <button
+                class="submit-button"
+                style="cursor:pointer;"
+                @click=${() => (this.createNewTask = true)}
+              >
+                Create Task
+              </button>
+              ${this.tasks.length === 0
+                ? html`<div class="splash-image">
+                    <img src="src/assets/logo.png" alt="" />
+                  </div>
+                  <h3 style="text-align:center;">
+                    You have no quests, create one!</h3>
+                  
+                  `
+                : ''}
+            `}
         ${!!this.tasks && this.tasks.length !== 0
           ? repeat(
               this.tasks,
