@@ -44,7 +44,6 @@ export class TaskCard extends LitElement {
     this.task = {};
     this.title = '';
     this.date = '';
-    this.link = '';
     this.isInfinite = false;
     this.isEditingModeOpen = false;
   }
@@ -55,16 +54,12 @@ export class TaskCard extends LitElement {
     this.title = this.task?.title;
     this.date = this.task?.date;
     this.isInfinite = this.task?.date === 'infinite' ? true : false;
-    this.setLink();
     this.stateListener();
   }
 
-  isThereALink() {
-    return this.extractUrl(this.task?.title);
-  }
-
-  setLink() {
-    this.link = this.extractUrl(this.task?.title);
+  isThereALink(task) {
+    let taskTitle = task.title;
+    return this.extractUrl(taskTitle);
   }
 
   extractUrl(text) {
@@ -95,7 +90,6 @@ export class TaskCard extends LitElement {
     this.dispatchEvent(
       new CustomEvent('edit-task-submit', { detail: { title, isInfinite } })
     );
-    this.setLink();
   }
 
   deleteTask() {
@@ -163,6 +157,13 @@ export class TaskCard extends LitElement {
                   @input=${(e) => {
                     this.handleChange(e);
                   }}
+                  @keydown=${(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault(); // prevent a new line from being added
+                      this.editTaskSubmit(this.title, this.isInfinite);
+                      state.set('CardBeingEditedId', '');
+                    }
+                  }}
                   type="text"
                   minlength="1"
                   maxlength="${this.maxLengthCharInput}"
@@ -192,11 +193,11 @@ export class TaskCard extends LitElement {
                   style="word-break: break-all; overflow-wrap: break-word; max-width:250px;"
                   >${this.removeUrl(this.task?.title)}</span
                 >
-                ${this.isThereALink()
+                ${this.isThereALink(this.task)
                   ? html`<div style="padding-left:5px;">
                       <link-button
                         .isCompleted="${this.task?.isCompleted}"
-                        link="${this.link}"
+                        link="${this.extractUrl(this.task?.title)}"
                       ></link-button>
                     </div>`
                   : ''} `}
