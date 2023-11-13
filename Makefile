@@ -22,4 +22,4 @@ zip:
 
 build:
 	npx esbuild src/app-main.js --bundle --format=esm --outfile=dist/app-main.js
-	zip -r d_quest_$(VERSION).zip dist/* logo.png manifest.json popup.html
+	zip -r d_quest_$(VERSION).zip dist/* manifest.json popup.html popup.js service-worker.js ./src/assets

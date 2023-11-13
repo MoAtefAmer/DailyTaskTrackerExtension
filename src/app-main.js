@@ -1,6 +1,6 @@
 import { html, css, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
-import { sharedStyles } from '../styles.js';
+import { sharedStyles } from './styles.js';
 import { state } from './state/state.js';
 
 import './components/task-card.js';
@@ -74,7 +74,12 @@ class App extends LitElement {
   async loadTasks() {
     // Always use this for global reload of tasks
     const { tasks } = await chrome.storage.sync.get('tasks');
-    this.tasks = this.sortTasks(tasks);
+
+    if (!!tasks) {
+      this.tasks = this.sortTasks(tasks);
+    } else {
+      this.tasks = tasks;
+    }
   }
 
   sortTasks(tasks) {
@@ -91,10 +96,10 @@ class App extends LitElement {
     return tasks;
   }
 
-   parseDate (str)  {
+  parseDate(str) {
     const [month, day, year] = str.split('/');
     return new Date(year, month - 1, day);
-  };
+  }
 
   async calculateDailyQuests() {
     let storedTime = await chrome.storage.local.get('currentDate');
@@ -103,14 +108,11 @@ class App extends LitElement {
     if (storedTime.currentDate === undefined) {
       chrome.storage.local.set({ currentDate: this.getNextDayDate() });
       storedTime = await chrome.storage.local.get('currentDate');
-     
-
     }
 
     const todaysDate = new Date().toLocaleDateString('en-US');
 
     if (this.parseDate(storedDateString) <= this.parseDate(todaysDate)) {
-  
       if (this.tasks.length !== 0) {
         this.tasks = this.tasks.filter((task) => {
           if (task.isCompleted) {
@@ -125,7 +127,6 @@ class App extends LitElement {
         });
         this.setTasks(this.tasks);
         chrome.storage.local.set({ currentDate: this.getNextDayDate() });
-      
       }
     }
   }

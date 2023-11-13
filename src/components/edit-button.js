@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { editIcon } from '../../icons.js';
+import { editIcon } from '../icons.js';
 export class EditButton extends LitElement {
   static styles = [
     css`

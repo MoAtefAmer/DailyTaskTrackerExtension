@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { trashIcon } from '../../icons.js';
+import { trashIcon } from '../icons.js';
 
 export class DeleteButton extends LitElement {
   static styles = [

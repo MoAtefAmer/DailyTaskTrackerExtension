@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { externalLinkIcon } from '../../icons.js';
+import { externalLinkIcon } from '../icons.js';
 export class LinkButton extends LitElement {
   static styles = [css``];
 

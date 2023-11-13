@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import { sharedStyles } from '../../styles';
+import { sharedStyles } from '../styles.js';
 import './delete-button.js';
 import './edit-button.js';
 import './complete-task-button.js';
@@ -57,14 +57,11 @@ export class TaskCard extends LitElement {
     this.isInfinite = this.task?.date === 'infinite' ? true : false;
     this.setLink();
     this.stateListener();
-
   }
 
-
-
   isThereALink() {
-      return this.extractUrl(this.task?.title);
-  }  
+    return this.extractUrl(this.task?.title);
+  }
 
   setLink() {
     this.link = this.extractUrl(this.task?.title);
@@ -123,19 +120,15 @@ export class TaskCard extends LitElement {
     return task.date === 'infinite' ? true : false;
   }
 
-  stateListener(){
+  stateListener() {
     state.addEventListener('CardBeingEditedId', (e) => {
-      if(e.detail.value === this.task?.id){
+      if (e.detail.value === this.task?.id) {
         this.isEditingModeOpen = true;
-      }else{
-        this.isEditingModeOpen = false
+      } else {
+        this.isEditingModeOpen = false;
       }
-
-     
-  })
+    });
   }
-
-
 
   removeUrl(text) {
     const urlRegex = /\s?(https?:\/\/[^\s]+)\s?/g;
@@ -169,7 +162,6 @@ export class TaskCard extends LitElement {
                   .value=${this.task.title}
                   @input=${(e) => {
                     this.handleChange(e);
-                  
                   }}
                   type="text"
                   minlength="1"
@@ -186,8 +178,8 @@ export class TaskCard extends LitElement {
                   <button
                     @click=${(e) => {
                       this.editTaskSubmit(this.title, this.isInfinite);
-                
-                      state.set('CardBeingEditedId','')
+
+                      state.set('CardBeingEditedId', '');
                     }}
                     class="edit-button"
                     style="background:green;z-index:100;"
@@ -232,11 +224,9 @@ export class TaskCard extends LitElement {
             @click=${() => {
               this.title = ''; // dont know if this is useful or not
               if (this.isEditingModeOpen) {
-         
-                state.set('CardBeingEditedId','')
+                state.set('CardBeingEditedId', '');
               } else {
-           
-                state.set('CardBeingEditedId',this.task?.id)
+                state.set('CardBeingEditedId', this.task?.id);
               }
             }}
           ></edit-button>
