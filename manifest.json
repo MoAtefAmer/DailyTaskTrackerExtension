@@ -15,7 +15,7 @@
       "48": "/src/assets/logo.png",
       "128": "/src/assets/logo.png"
     },
-    "permissions": ["storage"],
+    "permissions": ["storage","fileSystem"],
   
     "content_scripts": [{
       "matches": ["<all_urls>"],
