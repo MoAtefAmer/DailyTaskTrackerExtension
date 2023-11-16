@@ -114,6 +114,7 @@ export class TaskCard extends LitElement {
     return task.date === 'infinite' ? true : false;
   }
 
+
   stateListener() {
     state.addEventListener('CardBeingEditedId', (e) => {
       if (e.detail.value === this.task?.id) {
@@ -121,7 +122,10 @@ export class TaskCard extends LitElement {
       } else {
         this.isEditingModeOpen = false;
       }
+
+
     });
+
   }
 
   removeUrl(text) {
@@ -162,6 +166,7 @@ export class TaskCard extends LitElement {
                       e.preventDefault(); // prevent a new line from being added
                       this.editTaskSubmit(this.title, this.isInfinite);
                       state.set('CardBeingEditedId', '');
+                  
                     }
                   }}
                   type="text"
@@ -181,6 +186,7 @@ export class TaskCard extends LitElement {
                       this.editTaskSubmit(this.title, this.isInfinite);
 
                       state.set('CardBeingEditedId', '');
+                     
                     }}
                     class="edit-button"
                     style="background:green;z-index:100;"
@@ -227,7 +233,7 @@ export class TaskCard extends LitElement {
               if (this.isEditingModeOpen) {
                 state.set('CardBeingEditedId', '');
               } else {
-                state.set('CardBeingEditedId', this.task?.id);
+                state.set('CardBeingEditedId', this.task?.id + '');
               }
             }}
           ></edit-button>

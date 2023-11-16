@@ -5,8 +5,9 @@ export class State extends EventTarget { // implements EventTarget (partially an
 
     constructor() {
         super()
-
+    
         this.loadState()
+
 
         window.addEventListener('storage', (e) => {
             if (e.key.startsWith(State.statePrefix)) {
@@ -43,13 +44,15 @@ export class State extends EventTarget { // implements EventTarget (partially an
             console.error("error parsing stored state:", err)
         }
         this.stateMap = new Map(Object.entries(state))
-
         // the alternative way using individual keys
         for (let key in localStorage) {
-            let value = localStorage.getItem(key)
-            value = JSON.parse(value)
-            this.stateMap.set(key, value)
+            if (key.startsWith(State.statePrefix)) {
+                let value = localStorage.getItem(key);
+                value = JSON.parse(value);
+                this.stateMap.set(key.substring(State.statePrefix.length), value);
+            }
         }
+        console.log('state :>> ', state);
         return state
     }
 
@@ -87,6 +90,16 @@ export class State extends EventTarget { // implements EventTarget (partially an
 
     get(key) {
         return this.stateMap.get(key)
+    }
+
+    resetState(){
+       return localStorage.removeItem(State.stateKey)
+    }
+
+    resetStateItem(key){
+        console.log('localStorage.getItem(key) :>> ', localStorage.getItem(key));
+        return localStorage.removeItem(key)
+
     }
 
 }
