@@ -5,13 +5,12 @@ export class State extends EventTarget { // implements EventTarget (partially an
 
     constructor() {
         super()
-    
-        this.loadState()
 
+        this.loadState()
 
         window.addEventListener('storage', (e) => {
             if (e.key.startsWith(State.statePrefix)) {
-                console.log("storage event", e)
+                // console.log("storage event", e)
                 let key = e.key.substring(State.statePrefix.length)
                 let value = null
                 if (e.newValue) {
@@ -35,24 +34,24 @@ export class State extends EventTarget { // implements EventTarget (partially an
             this.stateMap = new Map()
             return null
         }
-        console.log("storedState:", storedState)
+        // console.log("storedState:", storedState)
         let state = null
         try {
             state = JSON.parse(storedState)
-            console.log("storedState:", state)
+            // console.log("storedState:", state)
         } catch (err) {
             console.error("error parsing stored state:", err)
         }
         this.stateMap = new Map(Object.entries(state))
+
         // the alternative way using individual keys
         for (let key in localStorage) {
             if (key.startsWith(State.statePrefix)) {
-                let value = localStorage.getItem(key);
-                value = JSON.parse(value);
-                this.stateMap.set(key.substring(State.statePrefix.length), value);
+                let value = localStorage.getItem(key)
+                value = JSON.parse(value)
+                this.stateMap.set(key, value)
             }
         }
-        console.log('state :>> ', state);
         return state
     }
 
@@ -72,7 +71,7 @@ export class State extends EventTarget { // implements EventTarget (partially an
                 value,
             },
         }))
-        return m // can chain calls together
+        return m
     }
 
     delete(key) {
@@ -90,16 +89,6 @@ export class State extends EventTarget { // implements EventTarget (partially an
 
     get(key) {
         return this.stateMap.get(key)
-    }
-
-    resetState(){
-       return localStorage.removeItem(State.stateKey)
-    }
-
-    resetStateItem(key){
-        console.log('localStorage.getItem(key) :>> ', localStorage.getItem(key));
-        return localStorage.removeItem(key)
-
     }
 
 }
