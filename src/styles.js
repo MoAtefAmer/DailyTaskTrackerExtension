@@ -112,7 +112,7 @@ export const sharedStyles = css`
     min-width: 400px;
     min-height: 500px;
 
-    /* background-color: #f5f5f5; */
+    background-color: var(--background-color);
     display: flex;
     justify-content: center;
     align-items: center;

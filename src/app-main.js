@@ -4,7 +4,7 @@ import { sharedStyles } from './styles.js';
 import { state } from './state/state.js';
 import './components/settings-menu.js';
 import './components/material-components.js';
-
+import { themeSwitcherState } from './state/themeSwitcher.js';
 import './components/task-card.js';
 import { ThemeMixin } from './mixins/themeMixin.js';
 
@@ -82,6 +82,7 @@ class App extends ThemeMixin(LitElement) {
     super.connectedCallback();
     await this.loadTasks();
     this.calculateDailyQuests();
+    themeSwitcherState.set(themeSwitcherState.theme);
   }
 
   updated() {
@@ -275,7 +276,7 @@ class App extends ThemeMixin(LitElement) {
         <div style="display: flex;justify-content: flex-end;">
           <settings-menu></settings-menu>
         </div>
-        <section class="main">
+        <section class="main ${this.theme}">
           ${this.createNewTask
             ? html` <div>
                   ${this.createNewTask

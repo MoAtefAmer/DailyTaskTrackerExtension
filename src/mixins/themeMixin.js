@@ -1,4 +1,4 @@
-import { themeSwithcherState } from '../state/themeSwitcher.js'
+import { themeSwitcherState } from '../state/themeSwitcher.js'
 
 export const ThemeMixin = (superClass) =>
   class extends superClass {
@@ -16,12 +16,13 @@ export const ThemeMixin = (superClass) =>
 
     connectedCallback() {
       super.connectedCallback()
-      this.theme = themeSwithcherState.theme
-      this.platform = themeSwithcherState.platform
-      themeSwithcherState.addEventListener(
+      this.theme = themeSwitcherState.theme
+      this.platform = themeSwitcherState.platform
+      themeSwitcherState.addEventListener(
         'updated',
         ({ detail: { theme, platform } }) => {
           console.log('Platform::', platform)
+          console.log('theme::', theme)
           this.theme = theme
           this.platform = platform
         }

@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit';
-import { themeSwithcherState } from '../state/themeSwitcher.js';
+import { themeSwitcherState,getSystemTheme } from '../state/themeSwitcher.js';
 import { ThemeMixin } from '../mixins/themeMixin.js';
 import './material-components.js';
 
@@ -32,12 +32,20 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
   static get properties() {
     return {
       isOpen: { type: Boolean },
+      currentTheme: { type: String },
     };
   }
 
   constructor() {
     super();
     this.isOpen = false;
+    this.currentTheme = '';
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.currentTheme = themeSwitcherState.theme;
+
   }
 
   // openThemeMenu() {
@@ -45,16 +53,21 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
   //   const menuEl = document.body.querySelector('#theme-menu');
   // }
 
-  // switchMode(e, _theme, platform) {
-  //   themeSwithcherState.set(_theme, platform);
-  //   e.stopPropagation();
-  // }
+  switchMode(e, _theme, platform) {
+    console.log('theme 1:>> ', _theme);
+    console.log('platform 1:>> ', platform);
+    themeSwitcherState.set(_theme, platform);
+    this.currentTheme = _theme;
+    e.stopPropagation();
+  }
 
   // get dir() {
   //   return document.querySelector('html').getAttribute('dir');
   // }
 
   render() {
+    console.log('getSystemTheme :>> ', getSystemTheme());
+  console.log('this.currentTheme :>> ', this.currentTheme);
     return html`
       <div class=${this.theme}>
         <span style="position: relative">
@@ -68,9 +81,18 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
             <!-- settings -->
           </md-outlined-icon-button>
           <md-menu .open="${this.isOpen}" id="usage-menu" anchor="usage-anchor">
-            <md-menu-item>
-              <div slot="headline">Apple</div>
-            </md-menu-item>
+            ${this.currentTheme === 'dark'
+              ? html` <md-menu-item
+                  @click=${(e) => this.switchMode(e, 'light', 'OS')}
+                >
+                  <div slot="headline">Light Theme</div>
+                </md-menu-item>`
+              : html` <md-menu-item
+                  @click=${(e) => this.switchMode(e, 'dark', 'OS')}
+                >
+                  <div slot="headline">Dark Theme</div>
+                </md-menu-item>`}
+
             <md-menu-item>
               <div slot="headline">Banana</div>
             </md-menu-item>

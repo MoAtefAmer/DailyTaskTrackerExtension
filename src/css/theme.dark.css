@@ -1,0 +1,8 @@
+:root[data-theme='dark'] {
+  --background-color: #040c1b;
+  --background-color2: #141b28;
+  --ntext-color: #c3ccd6;
+  --elevation-main: 0px 2px 6px -1px rgba(227, 227, 227, 0.02),
+    0px 0px 8px -1px rgba(227, 227, 227, 0.04);
+  --light-info: #040c1b;
+}
