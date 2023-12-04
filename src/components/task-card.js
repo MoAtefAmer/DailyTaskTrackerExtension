@@ -156,7 +156,7 @@ export class TaskCard extends LitElement {
             ? html`
                 <textarea
                   id="task-edit-input"
-                  style=" border: none;background: transparent;outline: none;box-shadow: none; max-width:250px; resize: none"
+                  style=" border: none;background: transparent;outline: none;box-shadow: none; max-width:250px; resize: none;background:var(--quest-card-bg);color:var(--primary-text-field-color);"
                   .value=${this.task.title}
                   @input=${(e) => {
                     this.handleChange(e);

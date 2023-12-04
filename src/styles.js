@@ -112,7 +112,7 @@ export const sharedStyles = css`
     min-width: 400px;
     min-height: 500px;
 
-    background-color: var(--background-color);
+    background-color: var(--background-color2);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -124,11 +124,12 @@ export const sharedStyles = css`
     margin-top: 5px;
     min-width: 300px;
     min-height: 50px;
-    background-color: #fff;
+    background-color: var(--quest-card-bg);
     border-radius: 10px;
     box-shadow: 0 0 10px #cdcdcd;
     display: flex;
     justify-content: center;
+    color: var(--ntext-color);
     align-items: start;
     flex-direction: column;
     padding: 1rem;

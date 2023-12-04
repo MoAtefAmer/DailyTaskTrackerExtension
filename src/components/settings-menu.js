@@ -2,7 +2,7 @@ import { html, css, LitElement } from 'lit';
 import { themeSwitcherState,getSystemTheme } from '../state/themeSwitcher.js';
 import { ThemeMixin } from '../mixins/themeMixin.js';
 import './material-components.js';
-
+import { sharedStyles } from '../styles.js';
 const themeMapper = {
   dark: 'dark_mode',
   light: 'light_mode',
@@ -10,6 +10,7 @@ const themeMapper = {
 
 export class SettingsMenu extends ThemeMixin(LitElement) {
   static styles = [
+    sharedStyles,
     css`
       :host {
         display: inline-block;
@@ -81,25 +82,28 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
             <!-- settings -->
           </md-outlined-icon-button>
           <md-menu .open="${this.isOpen}" id="usage-menu" anchor="usage-anchor">
+    
+
+            <md-menu-item>
+              <div slot="headline">Import Data</div>
+            </md-menu-item>
+            <md-menu-item>
+              <div slot="headline">Export Data</div>
+            </md-menu-item>
             ${this.currentTheme === 'dark'
               ? html` <md-menu-item
                   @click=${(e) => this.switchMode(e, 'light', 'OS')}
                 >
-                  <div slot="headline">Light Theme</div>
+              
+                  <div slot="headline" class="flex justify-center ">  <md-icon >light_mode</md-icon> </div>
                 </md-menu-item>`
               : html` <md-menu-item
                   @click=${(e) => this.switchMode(e, 'dark', 'OS')}
                 >
-                  <div slot="headline">Dark Theme</div>
+                <div slot="headline" class="flex justify-center ">  <md-icon >dark_mode</md-icon> </div>
                 </md-menu-item>`}
-
-            <md-menu-item>
-              <div slot="headline">Banana</div>
-            </md-menu-item>
-            <md-menu-item>
-              <div slot="headline">Cucumber</div>
-            </md-menu-item>
           </md-menu>
+          
         </span>
       </div>
     `;

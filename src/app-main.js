@@ -52,8 +52,8 @@ class App extends ThemeMixin(LitElement) {
         border: none;
         border-radius: 5px;
         padding: 15px;
-        background-color: #2563eb;
-        color: white;
+        background-color: var(--primary-button);
+        color: var(--primary-text-color);
       }
     `,
   ];
@@ -281,7 +281,7 @@ class App extends ThemeMixin(LitElement) {
             ? html` <div>
                   ${this.createNewTask
                     ? html`<button
-                        style="background:red;cursor:pointer;"
+                        style="background:red;color:white;cursor:pointer;"
                         class="submit-button"
                         @click="${() => (this.createNewTask = false)}"
                       >
@@ -291,6 +291,7 @@ class App extends ThemeMixin(LitElement) {
                 </div>
                 <form
                   id="create-task-form"
+                  style="background:var(--quest-card-bg);"
                   @submit=${(e) => {
                     e.preventDefault();
 
@@ -302,7 +303,7 @@ class App extends ThemeMixin(LitElement) {
                     style="display:flex;align-items:center;justify-content:center;"
                   >
                     <textarea
-                      style="resize:none;"
+                      style="resize:none;background:var(--quest-card-bg);color:var(--primary-text-field-color);"
                       id="task-input"
                       .value=${this.task}
                       @input=${(e) => {
@@ -338,7 +339,7 @@ class App extends ThemeMixin(LitElement) {
                   <div style="display:flex;align-items:center;">
                     <button
                       class="submit-button"
-                      style="cursor:pointer;"
+                      style="cursor:pointer;background-color:green;color:white;"
                       type="submit"
                     >
                       Create
