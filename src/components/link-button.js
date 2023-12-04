@@ -1,12 +1,14 @@
 import { LitElement, html, css } from 'lit';
 import { externalLinkIcon } from '../icons.js';
-export class LinkButton extends LitElement {
+import { ThemeMixin } from '../mixins/themeMixin.js';
+export class LinkButton extends ThemeMixin(LitElement) {
   static styles = [css``];
 
   static get properties() {
     return {
       link: { type: String },
       isCompleted: { type: Boolean },
+     
     };
   }
 
@@ -15,8 +17,13 @@ export class LinkButton extends LitElement {
     this.link = '';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+
+  }
   render() {
     return html` <div
+    class="${this.theme}"
       style="${this.isCompleted
         ? ' text-decoration: line-through; color: #b3b3b3;'
         : ''}"
@@ -26,7 +33,7 @@ export class LinkButton extends LitElement {
     >
       ${this.isCompleted
         ? externalLinkIcon('currentColor')
-        : externalLinkIcon('blue')}
+        : externalLinkIcon(this.theme === 'dark' ? '#fff' : 'blue')}
     </div>`;
   }
 }

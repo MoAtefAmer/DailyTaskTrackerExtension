@@ -2,10 +2,13 @@ import { html, css, LitElement } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import { sharedStyles } from './styles.js';
 import { state } from './state/state.js';
-
+import './components/settings-menu.js';
+import './components/material-components.js';
+import { themeSwitcherState } from './state/themeSwitcher.js';
 import './components/task-card.js';
+import { ThemeMixin } from './mixins/themeMixin.js';
 
-class App extends LitElement {
+class App extends ThemeMixin(LitElement) {
   static styles = [
     sharedStyles,
     css`
@@ -49,8 +52,8 @@ class App extends LitElement {
         border: none;
         border-radius: 5px;
         padding: 15px;
-        background-color: #2563eb;
-        color: white;
+        background-color: var(--primary-button);
+        color: var(--primary-text-color);
       }
     `,
   ];
@@ -79,6 +82,7 @@ class App extends LitElement {
     super.connectedCallback();
     await this.loadTasks();
     this.calculateDailyQuests();
+    themeSwitcherState.set(themeSwitcherState.theme);
   }
 
   updated() {
@@ -268,112 +272,119 @@ class App extends LitElement {
 
   render() {
     return html`
-      <section class="main">
-        ${this.createNewTask
-          ? html` <div>
-                ${this.createNewTask
-                  ? html`<button
-                      style="background:red;cursor:pointer;"
-                      class="submit-button"
-                      @click="${() => (this.createNewTask = false)}"
-                    >
-                      Close
-                    </button>`
-                  : ''}
-              </div>
-              <form
-                id="create-task-form"
-                @submit=${(e) => {
-                  e.preventDefault();
+      <section>
+        <div style="display: flex;justify-content: flex-end;">
+          <settings-menu></settings-menu>
+        </div>
+        <section class="main ${this.theme}">
+          ${this.createNewTask
+            ? html` <div>
+                  ${this.createNewTask
+                    ? html`<button
+                        style="background:red;color:white;cursor:pointer;"
+                        class="submit-button"
+                        @click="${() => (this.createNewTask = false)}"
+                      >
+                        Close
+                      </button>`
+                    : ''}
+                </div>
+                <form
+                  id="create-task-form"
+                  style="background:var(--quest-card-bg);"
+                  @submit=${(e) => {
+                    e.preventDefault();
 
-                  this.saveTask2();
-                  this.createNewTask = false;
-                }}
-              >
-                <div
-                  style="display:flex;align-items:center;justify-content:center;"
+                    this.saveTask2();
+                    this.createNewTask = false;
+                  }}
                 >
-                  <textarea
-                    style="resize:none;"
-                    id="task-input"
-                    .value=${this.task}
-                    @input=${(e) => {
-                      this.handleChange(e);
-                    }}
-                    @keydown=${(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault(); // prevent a new line from being added
-                        this.saveTask2();
-                        this.createNewTask = false;
-                      }
-                    }}
-                    type="text"
-                    minlength="1"
-                    maxlength="${this.maxLengthCharInput}"
+                  <div
+                    style="display:flex;align-items:center;justify-content:center;"
                   >
-                  </textarea>
-                </div>
-
-                <div style="display:flex;align-items:center;margin:1rem;">
-                  <label>
-                    <input
-                      id="normal"
-                      type="checkbox"
-                      @click=${(e) => {
-                        e.stopPropagation();
-                        this.toggleInfinite();
+                    <textarea
+                      style="resize:none;background:var(--quest-card-bg);color:var(--primary-text-field-color);"
+                      id="task-input"
+                      .value=${this.task}
+                      @input=${(e) => {
+                        this.handleChange(e);
                       }}
-                      .checked=${this.isInfinite}
-                    />
-                  </label>
-                </div>
-                <div style="display:flex;align-items:center;">
-                  <button
-                    class="submit-button"
-                    style="cursor:pointer;"
-                    type="submit"
-                  >
-                    Create
-                  </button>
-                </div>
-              </form>`
-          : html`
-              <button
-                class="submit-button"
-                style="cursor:pointer;"
-                @click=${() => (this.createNewTask = true)}
-              >
-                Create Task
-              </button>
-              ${this.tasks.length === 0
-                ? html`<div class="splash-image">
-                      <img src="src/assets/logo.png" alt="" />
-                    </div>
-                    <h3 style="text-align:center;">
-                      You have no quests, create one!
-                    </h3> `
-                : ''}
-            `}
-        ${!!this.tasks && this.tasks.length !== 0
-          ? repeat(
-              this.tasks,
-              (task) =>
-                html`<task-card
-                  .createNewTask="${this.createNewTask}"
-                  .maxLengthCharInput="${this.maxLengthCharInput}"
-                  @edit-task-submit="${(e) =>
-                    this.editTask(
-                      task?.id,
-                      e.detail.title,
-                      e.detail.isInfinite
-                    )}"
-                  @complete-task="${() => this.completeTask(task?.id)}"
-                  @toggle-infinite="${() => this.toggleInfinite()}"
-                  @delete-task="${() => this.deleteTask(task?.id)}"
-                  .task="${task}"
-                ></task-card>`
-            )
-          : ''}
+                      @keydown=${(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault(); // prevent a new line from being added
+                          this.saveTask2();
+                          this.createNewTask = false;
+                        }
+                      }}
+                      type="text"
+                      minlength="1"
+                      maxlength="${this.maxLengthCharInput}"
+                    >
+                    </textarea>
+                  </div>
+
+                  <div style="display:flex;align-items:center;margin:1rem;">
+                    <label>
+                      <input
+                        id="normal"
+                        type="checkbox"
+                        @click=${(e) => {
+                          e.stopPropagation();
+                          this.toggleInfinite();
+                        }}
+                        .checked=${this.isInfinite}
+                      />
+                    </label>
+                  </div>
+                  <div style="display:flex;align-items:center;">
+                    <button
+                      class="submit-button"
+                      style="cursor:pointer;background-color:green;color:white;"
+                      type="submit"
+                    >
+                      Create
+                    </button>
+                  </div>
+                </form>`
+            : html`
+                <button
+                  class="submit-button"
+                  style="cursor:pointer;"
+                  @click=${() => (this.createNewTask = true)}
+                >
+                  Create Task
+                </button>
+
+                ${this.tasks.length === 0
+                  ? html`<div class="splash-image">
+                        <img src="src/assets/logo.png" alt="" />
+                      </div>
+                      <h3 style="text-align:center;">
+                        You have no quests, create one!
+                      </h3> `
+                  : ''}
+              `}
+          ${!!this.tasks && this.tasks.length !== 0
+            ? repeat(
+                this.tasks,
+                (task) =>
+                  html`<task-card
+                    .createNewTask="${this.createNewTask}"
+                    .maxLengthCharInput="${this.maxLengthCharInput}"
+                    @edit-task-submit="${(e) =>
+                      this.editTask(
+                        task?.id,
+                        e.detail.title,
+                        e.detail.isInfinite
+                      )}"
+                    @complete-task="${() => this.completeTask(task?.id)}"
+                    @toggle-infinite="${() => this.toggleInfinite()}"
+                    @delete-task="${() => this.deleteTask(task?.id)}"
+                    .task="${task}"
+                  ></task-card>`
+              )
+            : ''}
+        </section>
       </section>
     `;
   }

@@ -1,0 +1,12 @@
+:root[data-theme='dark'] {
+  --background-color: #040c1b;
+  --background-color2: #141b28;
+  --ntext-color: #b7cefb;
+  --elevation-main: 0px 2px 6px -1px rgba(227, 227, 227, 0.02),
+    0px 0px 8px -1px rgba(227, 227, 227, 0.04);
+  --light-info: #040c1b;
+  --quest-card-bg:#111b3d;
+  --primary-button:white;
+  --primary-text-color:black;
+  --primary-text-field-color:white;
+}
