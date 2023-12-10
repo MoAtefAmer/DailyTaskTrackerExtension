@@ -1,5 +1,5 @@
 import { html, css, LitElement } from 'lit';
-import { themeSwitcherState,getSystemTheme } from '../state/themeSwitcher.js';
+import { themeSwitcherState, getSystemTheme } from '../state/themeSwitcher.js';
 import { ThemeMixin } from '../mixins/themeMixin.js';
 import './material-components.js';
 import { sharedStyles } from '../styles.js';
@@ -46,7 +46,6 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
   connectedCallback() {
     super.connectedCallback();
     this.currentTheme = themeSwitcherState.theme;
-
   }
 
   // openThemeMenu() {
@@ -66,9 +65,33 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
   //   return document.querySelector('html').getAttribute('dir');
   // }
 
+  // Function to export data to a JSON file
+  async exportToJsonFile() {
+    const { tasks } = await chrome.storage.sync.get('tasks');
+
+    if (!tasks) {
+      alert('No data to export');
+      return;
+    }
+
+    const fileName = 'export.json';
+    const jsonStr = JSON.stringify(tasks);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    // Create a link and trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+
+    // Cleanup: revoke object URL after download
+    URL.revokeObjectURL(url);
+  }
+
   render() {
     console.log('getSystemTheme :>> ', getSystemTheme());
-  console.log('this.currentTheme :>> ', this.currentTheme);
+    console.log('this.currentTheme :>> ', this.currentTheme);
     return html`
       <div class=${this.theme}>
         <span style="position: relative">
@@ -82,28 +105,30 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
             <!-- settings -->
           </md-outlined-icon-button>
           <md-menu .open="${this.isOpen}" id="usage-menu" anchor="usage-anchor">
-    
-
             <md-menu-item>
               <div slot="headline">Import Data</div>
             </md-menu-item>
             <md-menu-item>
-              <div slot="headline">Export Data</div>
+              <div slot="headline" @click=${(e) => this.exportToJsonFile()}>
+                Export Data
+              </div>
             </md-menu-item>
             ${this.currentTheme === 'dark'
               ? html` <md-menu-item
                   @click=${(e) => this.switchMode(e, 'light', 'OS')}
                 >
-              
-                  <div slot="headline" class="flex justify-center ">  <md-icon >light_mode</md-icon> </div>
+                  <div slot="headline" class="flex justify-center ">
+                    <md-icon>light_mode</md-icon>
+                  </div>
                 </md-menu-item>`
               : html` <md-menu-item
                   @click=${(e) => this.switchMode(e, 'dark', 'OS')}
                 >
-                <div slot="headline" class="flex justify-center ">  <md-icon >dark_mode</md-icon> </div>
+                  <div slot="headline" class="flex justify-center ">
+                    <md-icon>dark_mode</md-icon>
+                  </div>
                 </md-menu-item>`}
           </md-menu>
-          
         </span>
       </div>
     `;
