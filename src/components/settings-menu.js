@@ -3,10 +3,13 @@ import { themeSwitcherState, getSystemTheme } from '../state/themeSwitcher.js';
 import { ThemeMixin } from '../mixins/themeMixin.js';
 import './material-components.js';
 import { sharedStyles } from '../styles.js';
+import { generateId } from '../utils/generateID.js';
 const themeMapper = {
   dark: 'dark_mode',
   light: 'light_mode',
 };
+
+
 
 export class SettingsMenu extends ThemeMixin(LitElement) {
   static styles = [
@@ -61,11 +64,56 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
     e.stopPropagation();
   }
 
-  // get dir() {
-  //   return document.querySelector('html').getAttribute('dir');
-  // }
 
-  // Function to export data to a JSON file
+  async  importFromJsonFile() {
+    // Create an input element to allow the user to select a file
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json'; // Only accept .json files
+  
+    input.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) {
+        alert('No file selected');
+        return;
+      }
+  
+      const reader = new FileReader();
+  
+      reader.onload = async (e) => {
+        const fileContent = e.target.result;
+        try {
+          // Parse the JSON content
+          const tasksToImport = JSON.parse(fileContent);
+  
+          // Assign new IDs to the imported tasks using the generateId function
+          const updatedTasksToImport = tasksToImport.map(task => ({
+            ...task,
+            id: generateId() // Use generateId function to assign a new ID
+          }));
+  
+          // Get the existing tasks from Chrome storage
+          const { tasks: existingTasks } = await chrome.storage.sync.get('tasks');
+          const updatedTasks = existingTasks ? [...existingTasks, ...updatedTasksToImport] : updatedTasksToImport;
+  
+          // Save the updated tasks back to Chrome storage
+          await chrome.storage.sync.set({ tasks: updatedTasks });
+  
+          alert('Data imported successfully');
+        } catch (error) {
+          alert('Failed to import data: ' + error.message);
+        }
+      };
+  
+      // Read the content of the file
+      reader.readAsText(file);
+    });
+  
+    // Trigger the file input click event programmatically
+    input.click();
+    this.triggerReloadTasks();
+  }
+
   async exportToJsonFile() {
     const { tasks } = await chrome.storage.sync.get('tasks');
 
@@ -89,6 +137,14 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
     URL.revokeObjectURL(url);
   }
 
+
+  triggerReloadTasks() {
+    this.dispatchEvent(new CustomEvent('reload-tasks'), {
+      bubbles: true,
+      composed: true,
+    });
+  }
+
   render() {
     console.log('getSystemTheme :>> ', getSystemTheme());
     console.log('this.currentTheme :>> ', this.currentTheme);
@@ -106,7 +162,7 @@ export class SettingsMenu extends ThemeMixin(LitElement) {
           </md-outlined-icon-button>
           <md-menu .open="${this.isOpen}" id="usage-menu" anchor="usage-anchor">
             <md-menu-item>
-              <div slot="headline">Import Data</div>
+              <div slot="headline" @click=${(e)=>{this.importFromJsonFile()}}>Import Data</div>
             </md-menu-item>
             <md-menu-item>
               <div slot="headline" @click=${(e) => this.exportToJsonFile()}>
