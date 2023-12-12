@@ -274,7 +274,7 @@ class App extends ThemeMixin(LitElement) {
     return html`
       <section>
         <div style="display: flex;justify-content: flex-end;">
-          <settings-menu></settings-menu>
+          <settings-menu @reload-tasks=${this.loadTasks}></settings-menu>
         </div>
         <section class="main ${this.theme}">
           ${this.createNewTask
